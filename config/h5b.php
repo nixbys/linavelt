@@ -33,10 +33,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Google Analitics
+    | Google Analytics
     |--------------------------------------------------------------------------
     |
-    | Set this value to the site's ID of the analitics
+    | Set this value to the site's ID of the analytics
     | service that Google provides.
     |
     | Example: 'UA-XXXXX-Y'
