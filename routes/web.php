@@ -31,4 +31,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 });
 
+// Blog Routes
+Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+
+// Admin Routes
+Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+
 require __DIR__.'/auth.php';
