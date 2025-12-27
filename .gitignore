@@ -21,3 +21,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+# Ignore extracted actions-runner directory
+actions-runner/
