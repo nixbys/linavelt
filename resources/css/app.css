@@ -64,3 +64,16 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Enable dark mode */
+:root {
+    color-scheme: dark;
+}
+
+body {
+    @apply bg-gray-900 text-gray-100;
+}
