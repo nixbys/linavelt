@@ -39,6 +39,11 @@ jobs:
       - name: Install JS Dependencies
         run: npm install
 
+      - name: Check and Update Composer Dependencies
+        run: |
+          composer validate
+          composer update --no-interaction
+
       - name: Run Pint
         run: vendor/bin/pint
 
