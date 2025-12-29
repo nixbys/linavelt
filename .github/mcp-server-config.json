@@ -1,0 +1,10 @@
+{
+  "project": "linavelt-folder",
+  "frameworks": ["Laravel Livewire", "Vite.js", "Electron.js"],
+  "containerization": "Podman",
+  "tasks": {
+    "update": "Ensure repository is up-to-date",
+    "audit": "Continuously audit and resolve issues",
+    "sync": "Synchronize with linavelt folder configuration"
+  }
+}
