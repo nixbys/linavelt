@@ -3,10 +3,24 @@
 # Please see the documentation for all configuration options:
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
+# Dependabot configuration for managing dependencies in the project
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Update PHP dependencies
+  - package-ecosystem: "composer"
+    directory: "/" # Root directory for composer.json
     schedule:
       interval: "weekly"
- 
+
+  # Update Node.js dependencies
+  - package-ecosystem: "npm"
+    directory: "/" # Root directory for package.json
+    schedule:
+      interval: "weekly"
+
+  # Update GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows" # Directory for GitHub Actions workflows
+    schedule:
+      interval: "weekly"
+
