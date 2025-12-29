@@ -3,9 +3,9 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const PORT = 3000;
+const PORT = 4000; // Change port to 4000 for testing
 const LOG_FILE = path.join(__dirname, 'server.log');
-const WeakMapPolyfill = require('weakmap-polyfill');
+require('weakmap-polyfill');
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -77,13 +77,14 @@ async function runPeriodicTasks() {
 setInterval(runPeriodicTasks, 60 * 60 * 1000);
 
 // Start the server
-app.listen(PORT, () => {
-    logMessage(`MCP server is running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    logMessage(`MCP server is attempting to bind to http://0.0.0.0:${PORT}`);
 });
 
-// Replace side-channel and side-channel-weakmap usage with WeakMapPolyfill
-const myWeakMap = new WeakMapPolyfill();
+// Use the global WeakMap directly
+const myWeakMap = new WeakMap();
 
 // Example usage
-myWeakMap.set({}, 'value');
-console.log(myWeakMap.get({}));
+const obj = {};
+myWeakMap.set(obj, 'value');
+console.log(myWeakMap.get(obj));
