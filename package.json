@@ -3,7 +3,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "lint:js": "eslint resources/js"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",
@@ -21,6 +22,7 @@
         "lightningcss-linux-x64-gnu": "^1.29.1"
     },
     "devDependencies": {
-        "@ljharb/tsconfig": "^0.3.2"
+        "@ljharb/tsconfig": "^0.3.2",
+        "eslint": "^9.39.2"
     }
 }
