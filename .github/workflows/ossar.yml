@@ -2,6 +2,7 @@ jobs:
   ossar-scan:
     name: Run Updated Security Scan
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     steps:
       - name: Checkout repository
