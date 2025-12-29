@@ -52,7 +52,6 @@ jobs:
 
       - name: Run PHP CodeSniffer
         run: vendor/bin/phpcs --standard=phpcs.xml
-        continue-on-error: true
 
       - name: Run ESLint
         run: npm run lint:js

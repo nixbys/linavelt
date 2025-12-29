@@ -8,19 +8,18 @@ version: 2
 updates:
   # Update PHP dependencies
   - package-ecosystem: "composer"
-    directory: "/" # Root directory for composer.json
+    directory: "/"  # Root directory for composer.json
     schedule:
       interval: "weekly"
 
   # Update Node.js dependencies
   - package-ecosystem: "npm"
-    directory: "/" # Root directory for package.json
+    directory: "/"  # Root directory for package.json
     schedule:
       interval: "weekly"
 
   # Update GitHub Actions
   - package-ecosystem: "github-actions"
-    directory: "/.github/workflows" # Directory for GitHub Actions workflows
+    directory: "/.github/workflows"  # Directory for GitHub Actions workflows
     schedule:
       interval: "weekly"
-
