@@ -5,6 +5,7 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 const LOG_FILE = path.join(__dirname, 'server.log');
+const WeakMapPolyfill = require('weakmap-polyfill');
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -79,3 +80,10 @@ setInterval(runPeriodicTasks, 60 * 60 * 1000);
 app.listen(PORT, () => {
     logMessage(`MCP server is running on http://localhost:${PORT}`);
 });
+
+// Replace side-channel and side-channel-weakmap usage with WeakMapPolyfill
+const myWeakMap = new WeakMapPolyfill();
+
+// Example usage
+myWeakMap.set({}, 'value');
+console.log(myWeakMap.get({}));
