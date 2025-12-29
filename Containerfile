@@ -31,11 +31,11 @@ RUN useradd -m -s /bin/bash appuser
 # Switch to the non-root user
 USER appuser
 
-# Ensure proper permissions for Laravel app directory
-RUN chmod -R 755 /var/www/html && chmod -R 644 /var/www/html/package.json
-
 # Remove sensitive files from the image
 RUN rm -rf /var/www/html/.env /var/www/html/storage/oauth-private.key /var/www/html/storage/oauth-public.key
+
+# Ensure proper permissions for the copied files
+RUN chmod -R 755 /var/www/html && chown -R appuser:appuser /var/www/html
 
 # Enable multi-stage builds to reduce image size
 FROM scratch AS final

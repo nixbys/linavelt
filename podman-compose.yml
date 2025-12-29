@@ -26,3 +26,13 @@ services:
     ports:
       - "3306:3306"
     runtime: runc
+
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Containerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./mcp-server:/usr/src/app
+    restart: always
