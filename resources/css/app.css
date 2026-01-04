@@ -61,9 +61,6 @@ select:focus[data-flux-control] {
     @apply size-4;
 } */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* Enable dark mode */
 :root {
