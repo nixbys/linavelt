@@ -39,10 +39,17 @@ jobs:
       - name: Install JS Dependencies
         run: npm install
 
+      - name: Run NPM Audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
       - name: Check and Update Composer Dependencies
         run: |
           composer validate
           composer install --no-interaction
+
+      - name: Run Composer Audit
+        run: composer audit
 
       - name: Run Pint
         run: vendor/bin/pint
