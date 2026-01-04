@@ -23,7 +23,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
 
       - name: Add Flux Credentials Loaded From ENV
         run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
@@ -32,17 +32,24 @@ jobs:
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
 
       - name: Install JS Dependencies
         run: npm install
 
+      - name: Run NPM Audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
       - name: Check and Update Composer Dependencies
         run: |
           composer validate
           composer install --no-interaction
+
+      - name: Run Composer Audit
+        run: composer audit
 
       - name: Run Pint
         run: vendor/bin/pint
