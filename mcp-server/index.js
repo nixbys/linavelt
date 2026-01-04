@@ -1,4 +1,4 @@
-const { McpServer } = require('/home/nixbys/source/repos/linavelt/mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/server/mcp');
+const { McpServer } = require('./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/mcp');
 const { StdioServerTransport } = require('./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/stdio');
 const { exec } = require('child_process');
 const fs = require('fs');
