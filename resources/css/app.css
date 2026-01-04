@@ -1,5 +1,8 @@
 @import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
+/* @import '../../vendor/livewire/flux/dist/flux.css'; */
+
+/* Note: Flux CSS import is commented out to allow builds without Flux installed.
+   Uncomment the line above when Flux is properly installed via composer. */
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
