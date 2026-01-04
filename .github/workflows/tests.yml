@@ -54,6 +54,9 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
+      - name: Validate Blade Templates
+        run: php artisan view:cache
+
       - name: Build Assets
         run: npm run build
 

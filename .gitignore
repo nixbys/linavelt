@@ -23,3 +23,10 @@ yarn-error.log
 /.zed
 # Ignore extracted actions-runner directory
 actions-runner/
+# Ignore MCP server node_modules and logs
+/mcp-server/node_modules
+/mcp-server/server.log
+*.log
+# Test coverage
+/coverage
+.vitest
