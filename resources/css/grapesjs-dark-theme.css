@@ -1,0 +1,245 @@
+/* GrapeJS Dark Theme - Based on FluxUI Design */
+
+/* Main editor dark theme */
+.gjs-one-bg {
+    background-color: #171717;
+}
+
+.gjs-two-color {
+    color: #f5f5f5;
+}
+
+.gjs-three-bg {
+    background-color: #262626;
+    color: #f5f5f5;
+}
+
+.gjs-four-color,
+.gjs-four-color-h:hover {
+    color: #a3a3a3;
+}
+
+/* Panels */
+.gjs-pn-panel {
+    background-color: #262626;
+    border-color: #404040;
+}
+
+.gjs-pn-btn {
+    color: #f5f5f5;
+    background-color: #262626;
+    border-color: #404040;
+}
+
+.gjs-pn-btn:hover,
+.gjs-pn-btn.gjs-pn-active {
+    background-color: #404040;
+    color: #ffffff;
+}
+
+/* Block Manager */
+.gjs-blocks-c {
+    background-color: #171717;
+}
+
+.gjs-block {
+    background-color: #262626;
+    border: 1px solid #404040;
+    color: #f5f5f5;
+    transition: all 0.2s;
+}
+
+.gjs-block:hover {
+    background-color: #404040;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.gjs-block-label {
+    color: #f5f5f5;
+    font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Style Manager */
+.gjs-sm-sector {
+    background-color: #262626;
+    border-color: #404040;
+}
+
+.gjs-sm-sector .gjs-sm-title {
+    background-color: #171717;
+    color: #f5f5f5;
+    border-color: #404040;
+}
+
+.gjs-sm-property {
+    background-color: #262626;
+    color: #f5f5f5;
+}
+
+.gjs-sm-label {
+    color: #a3a3a3;
+}
+
+.gjs-field input,
+.gjs-field select,
+.gjs-field textarea {
+    background-color: #171717;
+    color: #f5f5f5;
+    border-color: #404040;
+}
+
+.gjs-field input:focus,
+.gjs-field select:focus,
+.gjs-field textarea:focus {
+    border-color: #737373;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(115, 115, 115, 0.2);
+}
+
+/* Layer Manager */
+.gjs-layers {
+    background-color: #171717;
+}
+
+.gjs-layer {
+    background-color: #262626;
+    color: #f5f5f5;
+    border-color: #404040;
+}
+
+.gjs-layer:hover {
+    background-color: #404040;
+}
+
+.gjs-layer.gjs-selected {
+    background-color: #525252;
+}
+
+/* Canvas */
+.gjs-cv-canvas {
+    background-color: #0a0a0a;
+}
+
+.gjs-cv-canvas__frames {
+    background-color: #0a0a0a;
+}
+
+/* Toolbar */
+.gjs-toolbar {
+    background-color: #262626;
+    border-color: #404040;
+}
+
+.gjs-toolbar-item {
+    color: #f5f5f5;
+    background-color: #262626;
+}
+
+.gjs-toolbar-item:hover {
+    background-color: #404040;
+}
+
+/* Modal */
+.gjs-mdl-dialog {
+    background-color: #262626;
+    border-color: #404040;
+    color: #f5f5f5;
+}
+
+.gjs-mdl-header {
+    background-color: #171717;
+    border-color: #404040;
+}
+
+.gjs-mdl-title {
+    color: #f5f5f5;
+    font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+.gjs-btn-prim {
+    background-color: #f5f5f5;
+    color: #171717;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.gjs-btn-prim:hover {
+    background-color: #e5e5e5;
+    transform: translateY(-1px);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #171717;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #525252;
+}
+
+/* Resizer */
+.gjs-resizer-h,
+.gjs-resizer-v {
+    background-color: #737373;
+}
+
+/* Category header */
+.gjs-block-category .gjs-title {
+    background-color: #171717;
+    color: #f5f5f5;
+    border-color: #404040;
+    font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Traits */
+.gjs-trt-traits {
+    background-color: #171717;
+}
+
+.gjs-trt-trait {
+    background-color: #262626;
+    color: #f5f5f5;
+    border-color: #404040;
+}
+
+.gjs-trt-trait__label {
+    color: #a3a3a3;
+}
+
+/* Custom FluxUI accent colors */
+.flux-accent {
+    color: #f5f5f5 !important;
+}
+
+.flux-accent-bg {
+    background-color: #f5f5f5 !important;
+    color: #171717 !important;
+}
+
+/* Responsive preview buttons */
+.gjs-pn-devices-c {
+    background-color: #262626;
+}
+
+.gjs-pn-device {
+    color: #f5f5f5;
+}
+
+.gjs-pn-device:hover,
+.gjs-pn-device.gjs-pn-active {
+    background-color: #404040;
+}

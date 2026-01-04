@@ -27,3 +27,7 @@ actions-runner/
 /mcp-server/node_modules
 /mcp-server/server.log
 *.log
+# Test coverage
+/coverage
+.vitest
+
