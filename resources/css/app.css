@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
+/* @import '../../vendor/livewire/flux/dist/flux.css'; */
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -8,9 +8,15 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+<<<<<<< HEAD
 /* 
  * This section defines a custom CSS at-rule named `@theme`.
  * The `@theme` rule is likely a user-defined or framework-specific construct 
+=======
+/*
+ * This section defines a custom CSS at-rule named `@theme`.
+ * The `@theme` rule is likely a user-defined or framework-specific construct
+>>>>>>> 2725d18 (feat: add Tailwind CSS configuration and update dependencies)
  * that is not natively recognized by standard CSS parsers or linters.
  * Ensure that the CSS preprocessor or framework being used supports `@theme`.
  * If this is intentional, you may need to configure your linter to ignore this rule.
@@ -58,9 +64,7 @@ select:focus[data-flux-control] {
     @apply size-4;
 } */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
 
 /* Enable dark mode */
 :root {
