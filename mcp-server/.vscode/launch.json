@@ -10,7 +10,8 @@
             "console": "integratedTerminal",
             "restart": true,
             "env": {
-                "NODE_ENV": "production"
+                "NODE_ENV": "production",
+                "MCP_API_KEY": "${env:MCP_API_KEY}"
             },
             "preLaunchTask": "Install MCP Dependencies"
         },
@@ -24,7 +25,8 @@
             "restart": true,
             "env": {
                 "NODE_ENV": "production",
-                "MCP_HOST": "http://localhost:4000"
+                "MCP_HOST": "http://localhost:4000",
+                "MCP_API_KEY": "${env:MCP_API_KEY}"
             }
         },
         {
@@ -35,7 +37,8 @@
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "env": {
-                "NODE_ENV": "development"
+                "NODE_ENV": "development",
+                "MCP_API_KEY": "${env:MCP_API_KEY}"
             },
             "sourceMaps": true
         }
