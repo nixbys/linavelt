@@ -18,6 +18,7 @@ const path = require('path');
 // Configuration
 // ---------------------------------------------------------------------------
 const MCP_HOST    = (process.env.MCP_HOST || 'http://localhost:4000');
+const MCP_API_KEY = process.env.MCP_API_KEY || '';
 const STATE_FILE  = path.join(__dirname, 'scheduler-state.json');
 const LOG_FILE    = path.join(__dirname, 'scheduler.log');
 
@@ -59,7 +60,10 @@ function request(method, urlStr) {
             port:     url.port || 80,
             path:     url.pathname,
             method,
-            headers:  { 'Content-Type': 'application/json' }
+            headers:  {
+                'Content-Type': 'application/json',
+                'X-Api-Key':    MCP_API_KEY
+            }
         };
 
         const req = http.request(options, res => {

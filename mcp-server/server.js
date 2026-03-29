@@ -2,13 +2,34 @@ const express = require('express');
 const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const app = express();
 const PORT = 4000; // Change port to 4000 for testing
 const LOG_FILE = path.join(__dirname, 'server.log');
-require('weakmap-polyfill');
 
 // Middleware to parse JSON requests
 app.use(express.json());
+
+// API key authentication for administrative endpoints.
+// Set MCP_API_KEY in the environment before starting the server.
+// Example: MCP_API_KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))") node server.js
+const API_KEY = process.env.MCP_API_KEY;
+
+function requireApiKey(req, res, next) {
+    if (!API_KEY) {
+        logMessage('WARNING: MCP_API_KEY is not set. Administrative endpoints are disabled.');
+        return res.status(503).json({ message: 'Server not configured: MCP_API_KEY environment variable is required.' });
+    }
+    const provided = req.headers['x-api-key'] || '';
+    // Hash both values before comparing to normalise length (timingSafeEqual requires equal-length buffers).
+    const providedHash = crypto.createHash('sha256').update(provided).digest();
+    const expectedHash = crypto.createHash('sha256').update(API_KEY).digest();
+    if (!crypto.timingSafeEqual(providedHash, expectedHash)) {
+        logMessage(`Unauthorized request to ${req.path} from ${req.ip}`);
+        return res.status(401).json({ message: 'Unauthorized: valid X-Api-Key header required.' });
+    }
+    next();
+}
 
 // Utility function to log messages
 function logMessage(message) {
@@ -33,8 +54,8 @@ function executeCommand(command, description) {
     });
 }
 
-// Endpoint to trigger repository update
-app.post('/update-repo', async (req, res) => {
+// Endpoint to trigger repository update (requires API key)
+app.post('/update-repo', requireApiKey, async (req, res) => {
     try {
         const output = await executeCommand('git pull origin main', 'Repository update');
         res.json({ message: 'Repository updated successfully', output });
@@ -43,8 +64,8 @@ app.post('/update-repo', async (req, res) => {
     }
 });
 
-// Endpoint to run security audits
-app.post('/run-audit', async (req, res) => {
+// Endpoint to run security audits (requires API key)
+app.post('/run-audit', requireApiKey, async (req, res) => {
     try {
         const output = await executeCommand('npm audit fix && composer update', 'Security audit');
         res.json({ message: 'Audit completed successfully', output });
@@ -80,11 +101,3 @@ setInterval(runPeriodicTasks, 60 * 60 * 1000);
 app.listen(PORT, '0.0.0.0', () => {
     logMessage(`MCP server is attempting to bind to http://0.0.0.0:${PORT}`);
 });
-
-// Use the global WeakMap directly
-const myWeakMap = new WeakMap();
-
-// Example usage
-const obj = {};
-myWeakMap.set(obj, 'value');
-console.log(myWeakMap.get(obj));
