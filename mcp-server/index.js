@@ -1,11 +1,13 @@
 const { McpServer } = require('./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/mcp');
 const { StdioServerTransport } = require('./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/stdio');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
 dotenv.config();
+
+const REPO = process.env.GITHUB_REPOSITORY || '';
 
 const server = new McpServer({
   name: 'laravel-maintenance',
@@ -17,10 +19,15 @@ server.registerTool('runGitHubChecks', {
   description: 'Executes GitHub workflow checks and resolves any issues.',
   inputSchema: {},
 }, async () => {
+  if (!REPO) {
+    return {
+      content: [{ type: 'text', text: 'GITHUB_REPOSITORY environment variable is not set. Cannot run workflow checks.' }],
+    };
+  }
   return new Promise((resolve, reject) => {
-    exec('gh workflow run --repo <your-repo> --all', (error, stdout, stderr) => {
+    execFile('gh', ['workflow', 'run', '--repo', REPO, '--all'], (error, stdout, stderr) => {
       if (error) {
-        reject(`Error: ${stderr}`);
+        reject(new Error(stderr ? `${error.message}: ${stderr}` : error.message));
       } else {
         resolve({
           content: [{ type: 'text', text: stdout }],
@@ -36,9 +43,9 @@ server.registerTool('updateDependencies', {
   inputSchema: {},
 }, async () => {
   return new Promise((resolve, reject) => {
-    exec('npm update', { cwd: path.resolve(__dirname, '../') }, (error, stdout, stderr) => {
+    execFile('npm', ['update'], { cwd: path.resolve(__dirname, '../') }, (error, stdout, stderr) => {
       if (error) {
-        reject(`Error: ${stderr}`);
+        reject(new Error(stderr ? `${error.message}: ${stderr}` : error.message));
       } else {
         resolve({
           content: [{ type: 'text', text: stdout }],
@@ -59,7 +66,7 @@ server.registerTool('logChanges', {
   return new Promise((resolve, reject) => {
     fs.appendFile(logPath, logMessage, (error) => {
       if (error) {
-        reject(`Error: ${error.message}`);
+        reject(new Error(error.message));
       } else {
         resolve({
           content: [{ type: 'text', text: 'Changes logged successfully.' }],

@@ -1,10 +1,11 @@
 const express = require('express');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const app = express();
-const PORT = 4000; // Change port to 4000 for testing
+const PORT = process.env.MCP_PORT ? parseInt(process.env.MCP_PORT, 10) : 4000;
+const HOST = process.env.MCP_HOST_BIND || '127.0.0.1';
 const LOG_FILE = path.join(__dirname, 'server.log');
 
 // Middleware to parse JSON requests
@@ -39,10 +40,10 @@ function logMessage(message) {
     console.log(message);
 }
 
-// Function to execute a command and log output
-function executeCommand(command, description) {
+// Function to execute a command safely (no shell interpolation) and log output
+function executeCommand(file, args, description) {
     return new Promise((resolve, reject) => {
-        exec(command, { cwd: process.cwd() }, (error, stdout, stderr) => {
+        execFile(file, args, { cwd: process.cwd() }, (error, stdout, stderr) => {
             if (error) {
                 logMessage(`${description} failed: ${error.message}`);
                 reject(error);
@@ -57,7 +58,7 @@ function executeCommand(command, description) {
 // Endpoint to trigger repository update (requires API key)
 app.post('/update-repo', requireApiKey, async (req, res) => {
     try {
-        const output = await executeCommand('git pull origin main', 'Repository update');
+        const output = await executeCommand('git', ['pull', 'origin', 'main'], 'Repository update');
         res.json({ message: 'Repository updated successfully', output });
     } catch (error) {
         res.status(500).json({ message: 'Failed to update repository', error: error.message });
@@ -67,8 +68,9 @@ app.post('/update-repo', requireApiKey, async (req, res) => {
 // Endpoint to run security audits (requires API key)
 app.post('/run-audit', requireApiKey, async (req, res) => {
     try {
-        const output = await executeCommand('npm audit fix && composer update', 'Security audit');
-        res.json({ message: 'Audit completed successfully', output });
+        const npmOutput = await executeCommand('npm', ['audit', 'fix'], 'npm security audit');
+        const composerOutput = await executeCommand('composer', ['update'], 'Composer update');
+        res.json({ message: 'Audit completed successfully', output: { npm: npmOutput, composer: composerOutput } });
     } catch (error) {
         res.status(500).json({ message: 'Failed to run audit', error: error.message });
     }
@@ -83,10 +85,11 @@ app.get('/health', (req, res) => {
 async function runPeriodicTasks() {
     try {
         logMessage('Starting periodic repository update...');
-        await executeCommand('git pull origin main', 'Periodic repository update');
+        await executeCommand('git', ['pull', 'origin', 'main'], 'Periodic repository update');
 
         logMessage('Starting periodic security audit...');
-        await executeCommand('npm audit fix && composer update', 'Periodic security audit');
+        await executeCommand('npm', ['audit', 'fix'], 'Periodic npm audit');
+        await executeCommand('composer', ['update'], 'Periodic composer update');
 
         logMessage('Periodic tasks completed successfully.');
     } catch (error) {
@@ -98,6 +101,6 @@ async function runPeriodicTasks() {
 setInterval(runPeriodicTasks, 60 * 60 * 1000);
 
 // Start the server
-app.listen(PORT, '0.0.0.0', () => {
-    logMessage(`MCP server is attempting to bind to http://0.0.0.0:${PORT}`);
+app.listen(PORT, HOST, () => {
+    logMessage(`MCP server is running on http://${HOST}:${PORT}`);
 });
