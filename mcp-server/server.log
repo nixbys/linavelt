@@ -5,3 +5,267 @@
 [2025-12-29T05:51:47.576Z] MCP server is attempting to bind to http://0.0.0.0:4000
 [2025-12-29T05:58:42.934Z] MCP server is attempting to bind to http://0.0.0.0:4000
 [2026-01-25T05:29:34.304Z] MCP server is attempting to bind to http://0.0.0.0:4000
+[2026-03-29T23:00:45.642Z] MCP server is attempting to bind to http://0.0.0.0:4000
+[2026-03-30T00:00:45.661Z] Starting periodic repository update...
+[2026-03-30T00:00:46.393Z] Periodic repository update succeeded: Already up to date.
+
+[2026-03-30T00:00:46.393Z] Starting periodic security audit...
+[2026-03-30T00:00:47.221Z] Periodic security audit failed: Command failed: npm audit fix && composer update
+No composer.json in current directory, to use the one at /home/nixbys/source/repos/linavelt run interactively or set config.use-parent-dir to true
+Composer could not find a composer.json file in /home/nixbys/source/repos/linavelt/mcp-server
+To initialize a project, please create a composer.json file. See https://getcomposer.org/basic-usage
+
+[2026-03-30T00:00:47.221Z] Periodic tasks encountered an error: Command failed: npm audit fix && composer update
+No composer.json in current directory, to use the one at /home/nixbys/source/repos/linavelt run interactively or set config.use-parent-dir to true
+Composer could not find a composer.json file in /home/nixbys/source/repos/linavelt/mcp-server
+To initialize a project, please create a composer.json file. See https://getcomposer.org/basic-usage
+
+[2026-03-30T01:00:45.685Z] Starting periodic repository update...
+[2026-03-30T01:00:46.181Z] Periodic repository update failed: Command failed: git pull origin main
+From https://github.com/nixbys/linavelt
+ * branch            main       -> FETCH_HEAD
+   a429bbe..2259cd5  main       -> origin/main
+error: Your local changes to the following files would be overwritten by merge:
+	mcp-server/node_modules/.package-lock.json
+	mcp-server/node_modules/@hono/node-server/README.md
+	mcp-server/node_modules/@hono/node-server/dist/globals.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/globals.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/globals.js
+	mcp-server/node_modules/@hono/node-server/dist/globals.mjs
+	mcp-server/node_modules/@hono/node-server/dist/index.js
+	mcp-server/node_modules/@hono/node-server/dist/index.mjs
+	mcp-server/node_modules/@hono/node-server/dist/listener.js
+	mcp-server/node_modules/@hono/node-server/dist/listener.mjs
+	mcp-server/node_modules/@hono/node-server/dist/request.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/request.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/response.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/response.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/response.js
+	mcp-server/node_modules/@hono/node-server/dist/response.mjs
+	mcp-server/node_modules/@hono/node-server/dist/serve-static.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/serve-static.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/serve-static.js
+	mcp-server/node_modules/@hono/node-server/dist/serve-static.mjs
+	mcp-server/node_modules/@hono/node-server/dist/server.js
+	mcp-server/node_modules/@hono/node-server/dist/server.mjs
+	mcp-server/node_modules/@hono/node-server/dist/types.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/types.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/utils.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/utils.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/vercel.js
+	mcp-server/node_modules/@hono/node-server/dist/vercel.mjs
+	mcp-server/node_modules/@hono/node-server/package.json
+	mcp-server/node_modules/@modelcontextprotocol/sdk/README.md
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth-extensions.d.ts
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth-extensions.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth-extensions.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth-extensions.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth.d.ts
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/index.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/index.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/index.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/elicitationUrlExample.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/elicitationUrlExample.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/simpleOAuthClient.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/simpleOAuthClient.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/simpleStreamableHttp.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/simpleStreamableHttp.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/elicitationFormExample.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/elicitationFormExample.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/honoWebStandardStreamableHttp.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/honoWebStandardStreamableHttp.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/simpleStreamableHttp.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/simpleStreamableHttp.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/ser
+error: The following untracked working tree files would be overwritten by merge:
+	mcp-server/node_modules/@hono/node-server/LICENSE
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/progressExample.d.ts
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/progressExample.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/progressExample.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/progressExample.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/progressExample.d.ts
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/progressExample.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/progressExample.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/progressExample.js.map
+	mcp-server/node_modules/hono/dist/adapter/aws-lambda/conninfo.js
+	mcp-server/node_modules/hono/dist/adapter/cloudflare-pages/conninfo.js
+	mcp-server/node_modules/hono/dist/adapter/netlify/conninfo.js
+	mcp-server/node_modules/hono/dist/cjs/adapter/aws-lambda/conninfo.js
+	mcp-server/node_modules/hono/dist/cjs/adapter/cloudflare-pages/conninfo.js
+	mcp-server/node_modules/hono/dist/cjs/adapter/netlify/conninfo.js
+	mcp-server/node_modules/hono/dist/cjs/helper/ssg/plugins.js
+	mcp-server/node_modules/hono/dist/helper/ssg/plugins.js
+	mcp-server/node_modules/hono/dist/tsconfig.build.tsbuildinfo
+	mcp-server/node_modules/hono/dist/types/adapter/aws-lambda/conninfo.d.ts
+	mcp-server/node_modules/hono/dist/types/adapter/cloudflare-pages/conninfo.d.ts
+	mcp-server/node_modules/hono/dist/types/adapter/netlify/conninfo.d.ts
+	mcp-server/node_modules/hono/dist/types/helper/ssg/plugins.d.ts
+	mcp-server/node_modules/ip-address/LICENSE
+	mcp-server/node_modules/ip-address/README.md
+	mcp-server/node_modules/ip-address/dist/address-error.d.ts
+	mcp-server/node_modules/ip-address/dist/address-error.d.ts.map
+	mcp-server/node_modules/ip-address/dist/address-error.js
+	mcp-server/node_modules/ip-address/dist/address-error.js.map
+	mcp-server/node_modules/ip-address/dist/common.d.ts
+	mcp-server/node_modules/ip-address/dist/common.d.ts.map
+	mcp-server/node_modules/ip-address/dist/common.js
+	mcp-server/node_modules/ip-address/dist/common.js.map
+	mcp-server/node_modules/ip-address/dist/ip-address.d.ts
+	mcp-server/node_modules/ip-address/dist/ip-address.d.ts.map
+	mcp-server/node_modules/ip-address/dist/ip-address.js
+	mcp-server/node_modules/ip-address/dist/ip-address.js.map
+	mcp-server/node_modules/ip-address/dist/ipv4.d.ts
+	mcp-server/node_modules/ip-address/dist/ipv4.d.ts.map
+	mcp-server/node_modules/ip-address/dist/ipv4.js
+	mcp-server/node_modules/ip-address/dist/ipv4.js.map
+	mcp-server/node_modules/ip-address/dist/ipv6.d.ts
+	mcp-server/node_modules/ip-address/dist/ipv6.d.ts.map
+	mcp-server/node_modules/ip-address/dist/ipv6.js
+	mcp-server/node_modules/ip-address/dist/ipv6.js.map
+	mcp-server/node_modules/ip-address/dist/v4/constants.d.ts
+	mcp-server/node_modules/ip-address/dist/v4/constants.d.ts.map
+	mcp-server/node_modules/ip-address/dist/v4/constants.js
+	mcp-server/node_modules/ip-address/dist/v4/constants.js.map
+	mcp-server/node_modules/ip-address/dist/v6/constants.d.ts
+	mcp-server/node_modules/ip-address/dist/v6/constants.d.ts.map
+	mcp-server/node_modules/ip-address/dist/v6/constants.js
+	mcp-server/node_modules/ip-address/dist/v6/constants.js.map
+	mcp-server/node_modules/ip-address/dist/v6/helpers.d.ts
+	mcp-server/node_modules/ip-address/dist/v6/helpers.d.ts.map
+	mcp-server/node_modules/ip-address/dist/v6/helpers.js
+	mcp-server/node_modules/ip-address/dist/v6/helpers.js.map
+	mcp-server/node_modules/ip-address/dist/v6/regular-expressions.d.ts
+	mcp-server/node_modules/ip-address/dist/v6/regular-expressions.d.ts.map
+	mcp-server/node_modules/ip-address/dist/v6/regular-expressions.js
+	mcp-server/node_modules/ip-address/dist/v6/regular-expressions.js.map
+	mcp-server/node_modules/ip-address/package.json
+	mcp-server/node_modules/ip-address/src/address-error.ts
+Aborting
+
+[2026-03-30T01:00:46.182Z] Periodic tasks encountered an error: Command failed: git pull origin main
+From https://github.com/nixbys/linavelt
+ * branch            main       -> FETCH_HEAD
+   a429bbe..2259cd5  main       -> origin/main
+error: Your local changes to the following files would be overwritten by merge:
+	mcp-server/node_modules/.package-lock.json
+	mcp-server/node_modules/@hono/node-server/README.md
+	mcp-server/node_modules/@hono/node-server/dist/globals.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/globals.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/globals.js
+	mcp-server/node_modules/@hono/node-server/dist/globals.mjs
+	mcp-server/node_modules/@hono/node-server/dist/index.js
+	mcp-server/node_modules/@hono/node-server/dist/index.mjs
+	mcp-server/node_modules/@hono/node-server/dist/listener.js
+	mcp-server/node_modules/@hono/node-server/dist/listener.mjs
+	mcp-server/node_modules/@hono/node-server/dist/request.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/request.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/response.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/response.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/response.js
+	mcp-server/node_modules/@hono/node-server/dist/response.mjs
+	mcp-server/node_modules/@hono/node-server/dist/serve-static.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/serve-static.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/serve-static.js
+	mcp-server/node_modules/@hono/node-server/dist/serve-static.mjs
+	mcp-server/node_modules/@hono/node-server/dist/server.js
+	mcp-server/node_modules/@hono/node-server/dist/server.mjs
+	mcp-server/node_modules/@hono/node-server/dist/types.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/types.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/utils.d.mts
+	mcp-server/node_modules/@hono/node-server/dist/utils.d.ts
+	mcp-server/node_modules/@hono/node-server/dist/vercel.js
+	mcp-server/node_modules/@hono/node-server/dist/vercel.mjs
+	mcp-server/node_modules/@hono/node-server/package.json
+	mcp-server/node_modules/@modelcontextprotocol/sdk/README.md
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth-extensions.d.ts
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth-extensions.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth-extensions.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth-extensions.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth.d.ts
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/auth.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/index.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/index.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/client/index.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/elicitationUrlExample.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/elicitationUrlExample.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/simpleOAuthClient.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/simpleOAuthClient.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/simpleStreamableHttp.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/client/simpleStreamableHttp.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/elicitationFormExample.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/elicitationFormExample.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/honoWebStandardStreamableHttp.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/honoWebStandardStreamableHttp.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/simpleStreamableHttp.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/simpleStreamableHttp.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/ser
+error: The following untracked working tree files would be overwritten by merge:
+	mcp-server/node_modules/@hono/node-server/LICENSE
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/progressExample.d.ts
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/progressExample.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/progressExample.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/cjs/examples/server/progressExample.js.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/progressExample.d.ts
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/progressExample.d.ts.map
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/progressExample.js
+	mcp-server/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/progressExample.js.map
+	mcp-server/node_modules/hono/dist/adapter/aws-lambda/conninfo.js
+	mcp-server/node_modules/hono/dist/adapter/cloudflare-pages/conninfo.js
+	mcp-server/node_modules/hono/dist/adapter/netlify/conninfo.js
+	mcp-server/node_modules/hono/dist/cjs/adapter/aws-lambda/conninfo.js
+	mcp-server/node_modules/hono/dist/cjs/adapter/cloudflare-pages/conninfo.js
+	mcp-server/node_modules/hono/dist/cjs/adapter/netlify/conninfo.js
+	mcp-server/node_modules/hono/dist/cjs/helper/ssg/plugins.js
+	mcp-server/node_modules/hono/dist/helper/ssg/plugins.js
+	mcp-server/node_modules/hono/dist/tsconfig.build.tsbuildinfo
+	mcp-server/node_modules/hono/dist/types/adapter/aws-lambda/conninfo.d.ts
+	mcp-server/node_modules/hono/dist/types/adapter/cloudflare-pages/conninfo.d.ts
+	mcp-server/node_modules/hono/dist/types/adapter/netlify/conninfo.d.ts
+	mcp-server/node_modules/hono/dist/types/helper/ssg/plugins.d.ts
+	mcp-server/node_modules/ip-address/LICENSE
+	mcp-server/node_modules/ip-address/README.md
+	mcp-server/node_modules/ip-address/dist/address-error.d.ts
+	mcp-server/node_modules/ip-address/dist/address-error.d.ts.map
+	mcp-server/node_modules/ip-address/dist/address-error.js
+	mcp-server/node_modules/ip-address/dist/address-error.js.map
+	mcp-server/node_modules/ip-address/dist/common.d.ts
+	mcp-server/node_modules/ip-address/dist/common.d.ts.map
+	mcp-server/node_modules/ip-address/dist/common.js
+	mcp-server/node_modules/ip-address/dist/common.js.map
+	mcp-server/node_modules/ip-address/dist/ip-address.d.ts
+	mcp-server/node_modules/ip-address/dist/ip-address.d.ts.map
+	mcp-server/node_modules/ip-address/dist/ip-address.js
+	mcp-server/node_modules/ip-address/dist/ip-address.js.map
+	mcp-server/node_modules/ip-address/dist/ipv4.d.ts
+	mcp-server/node_modules/ip-address/dist/ipv4.d.ts.map
+	mcp-server/node_modules/ip-address/dist/ipv4.js
+	mcp-server/node_modules/ip-address/dist/ipv4.js.map
+	mcp-server/node_modules/ip-address/dist/ipv6.d.ts
+	mcp-server/node_modules/ip-address/dist/ipv6.d.ts.map
+	mcp-server/node_modules/ip-address/dist/ipv6.js
+	mcp-server/node_modules/ip-address/dist/ipv6.js.map
+	mcp-server/node_modules/ip-address/dist/v4/constants.d.ts
+	mcp-server/node_modules/ip-address/dist/v4/constants.d.ts.map
+	mcp-server/node_modules/ip-address/dist/v4/constants.js
+	mcp-server/node_modules/ip-address/dist/v4/constants.js.map
+	mcp-server/node_modules/ip-address/dist/v6/constants.d.ts
+	mcp-server/node_modules/ip-address/dist/v6/constants.d.ts.map
+	mcp-server/node_modules/ip-address/dist/v6/constants.js
+	mcp-server/node_modules/ip-address/dist/v6/constants.js.map
+	mcp-server/node_modules/ip-address/dist/v6/helpers.d.ts
+	mcp-server/node_modules/ip-address/dist/v6/helpers.d.ts.map
+	mcp-server/node_modules/ip-address/dist/v6/helpers.js
+	mcp-server/node_modules/ip-address/dist/v6/helpers.js.map
+	mcp-server/node_modules/ip-address/dist/v6/regular-expressions.d.ts
+	mcp-server/node_modules/ip-address/dist/v6/regular-expressions.d.ts.map
+	mcp-server/node_modules/ip-address/dist/v6/regular-expressions.js
+	mcp-server/node_modules/ip-address/dist/v6/regular-expressions.js.map
+	mcp-server/node_modules/ip-address/package.json
+	mcp-server/node_modules/ip-address/src/address-error.ts
+Aborting
+
