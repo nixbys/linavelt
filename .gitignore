@@ -18,6 +18,9 @@ yarn-error.log
 /auth.json
 /.fleet
 /.idea
+# MCP scheduler runtime state
+mcp-server/scheduler-state.json
+mcp-server/scheduler.log
 /.nova
 /.vscode
 /.zed

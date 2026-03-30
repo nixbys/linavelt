@@ -1,16 +1,169 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "Run Laravel Maintenance MCP Server",
-			"type": "shell",
-			"command": "node",
-			"args": [
-				"index.js"
-			],
-			"isBackground": true,
-			"problemMatcher": [],
-			"group": "build"
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        // ── Dependencies ────────────────────────────────────────────────────
+        {
+            "label": "Install MCP Dependencies",
+            "type": "shell",
+            "command": "npm install",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+
+        // ── Server ──────────────────────────────────────────────────────────
+        {
+            "label": "Start MCP Server",
+            "type": "shell",
+            "command": "node server.js",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "NODE_ENV": "production"
+                }
+            },
+            "isBackground": true,
+            "dependsOn": "Install MCP Dependencies",
+            "problemMatcher": [
+                {
+                    "pattern": {
+                        "regexp": ".",
+                        "file": 1,
+                        "location": 2,
+                        "message": 3
+                    },
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "MCP server is attempting to bind",
+                        "endsPattern": "MCP server is attempting to bind"
+                    }
+                }
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+
+        // ── Scheduler (maintenance) ─────────────────────────────────────────
+        {
+            "label": "Start MCP Scheduler",
+            "type": "shell",
+            "command": "node scheduler.js",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "MCP_HOST": "http://localhost:4000"
+                }
+            },
+            "isBackground": true,
+            "dependsOn": "Start MCP Server",
+            "problemMatcher": [],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+
+        // ── Individual endpoint tasks ────────────────────────────────────────
+        {
+            "label": "MCP: Health Check",
+            "type": "shell",
+            "command": "curl -s http://localhost:4000/health | node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.stringify(JSON.parse(d),null,2)))\"",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "MCP: Update Repository",
+            "type": "shell",
+            "command": "curl -s -X POST http://localhost:4000/update-repo | node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.stringify(JSON.parse(d),null,2)))\"",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "MCP: Run Security Audit",
+            "type": "shell",
+            "command": "curl -s -X POST http://localhost:4000/run-audit | node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.stringify(JSON.parse(d),null,2)))\"",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+
+        // ── Full maintenance run (all endpoints once) ────────────────────────
+        {
+            "label": "MCP: Full Maintenance Run",
+            "dependsOn": [
+                "MCP: Health Check",
+                "MCP: Update Repository",
+                "MCP: Run Security Audit"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": [],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+
+        // ── Compound: start everything ───────────────────────────────────────
+        {
+            "label": "MCP: Start Server + Scheduler",
+            "dependsOn": [
+                "Start MCP Server",
+                "Start MCP Scheduler"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+
+        // ── Legacy task (kept for backwards compatibility) ───────────────────
+        {
+            "label": "Run Laravel Maintenance MCP Server",
+            "type": "shell",
+            "command": "node",
+            "args": [
+                "index.js"
+            ],
+            "isBackground": true,
+            "problemMatcher": [],
+            "group": "build"
+        }
+    ]
 }
