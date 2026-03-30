@@ -1,62 +1,81 @@
+'use strict';
+
 const express = require('express');
 const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const app = express();
-const _rawPort = parseInt(process.env.MCP_PORT, 10);
-const PORT = (_rawPort >= 1 && _rawPort <= 65535) ? _rawPort : 4000;
+
+// ---------------------------------------------------------------------------
+// Configuration
+// ---------------------------------------------------------------------------
+const parsedPort = parseInt(process.env.MCP_PORT, 10);
+const PORT = (parsedPort >= 1 && parsedPort <= 65535) ? parsedPort : 4000;
 const HOST = process.env.MCP_HOST_BIND || '127.0.0.1';
 const LOG_FILE = path.join(__dirname, 'server.log');
+const API_KEY = process.env.MCP_API_KEY;
+const PERIODIC_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
-// Middleware to parse JSON requests
+// ---------------------------------------------------------------------------
+// Application setup
+// ---------------------------------------------------------------------------
+const app = express();
 app.use(express.json());
 
-// API key authentication for administrative endpoints.
+// ---------------------------------------------------------------------------
+// Logging
+// ---------------------------------------------------------------------------
+function logMessage(message) {
+    const entry = `[${new Date().toISOString()}] ${message}\n`;
+    fs.appendFileSync(LOG_FILE, entry);
+    console.log(message);
+}
+
+// ---------------------------------------------------------------------------
+// Authentication
+// ---------------------------------------------------------------------------
 // Set MCP_API_KEY in the environment before starting the server.
 // Example: MCP_API_KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))") node server.js
-const API_KEY = process.env.MCP_API_KEY;
-
 function requireApiKey(req, res, next) {
     if (!API_KEY) {
         logMessage('WARNING: MCP_API_KEY is not set. Administrative endpoints are disabled.');
         return res.status(503).json({ message: 'Server not configured: MCP_API_KEY environment variable is required.' });
     }
+
     const provided = req.headers['x-api-key'] || '';
     // Hash both values before comparing to normalise length (timingSafeEqual requires equal-length buffers).
     const providedHash = crypto.createHash('sha256').update(provided).digest();
     const expectedHash = crypto.createHash('sha256').update(API_KEY).digest();
+
     if (!crypto.timingSafeEqual(providedHash, expectedHash)) {
         logMessage(`Unauthorized request to ${req.path} from ${req.ip}`);
         return res.status(401).json({ message: 'Unauthorized: valid X-Api-Key header required.' });
     }
+
     next();
 }
 
-// Utility function to log messages
-function logMessage(message) {
-    const timestamp = new Date().toISOString();
-    const logEntry = `[${timestamp}] ${message}\n`;
-    fs.appendFileSync(LOG_FILE, logEntry);
-    console.log(message);
-}
-
-// Function to execute a command safely (no shell interpolation) and log output
+// ---------------------------------------------------------------------------
+// Command execution (no shell — prevents injection)
+// ---------------------------------------------------------------------------
 function executeCommand(file, args, description) {
     return new Promise((resolve, reject) => {
-        execFile(file, args, { cwd: process.cwd() }, (error, stdout, stderr) => {
+        execFile(file, args, { cwd: process.cwd() }, (error, stdout) => {
             if (error) {
                 logMessage(`${description} failed: ${error.message}`);
                 reject(error);
             } else {
-                logMessage(`${description} succeeded: ${stdout}`);
+                logMessage(`${description} succeeded: ${stdout.trim()}`);
                 resolve(stdout);
             }
         });
     });
 }
 
-// Endpoint to trigger repository update (requires API key)
+// ---------------------------------------------------------------------------
+// Routes
+// ---------------------------------------------------------------------------
+/** Trigger a git pull from the main branch (requires API key). */
 app.post('/update-repo', requireApiKey, async (req, res) => {
     try {
         const output = await executeCommand('git', ['pull', 'origin', 'main'], 'Repository update');
@@ -66,42 +85,44 @@ app.post('/update-repo', requireApiKey, async (req, res) => {
     }
 });
 
-// Endpoint to run security audits (requires API key)
+/** Run npm and Composer security audits (requires API key). */
 app.post('/run-audit', requireApiKey, async (req, res) => {
     try {
         const npmOutput = await executeCommand('npm', ['audit', 'fix'], 'npm security audit');
         const composerOutput = await executeCommand('composer', ['update'], 'Composer update');
-        res.json({ message: 'Audit completed successfully', output: { npm: npmOutput, composer: composerOutput } });
+        res.json({
+            message: 'Audit completed successfully',
+            output: { npm: npmOutput.trim(), composer: composerOutput.trim() },
+        });
     } catch (error) {
         res.status(500).json({ message: 'Failed to run audit', error: error.message });
     }
 });
 
-// Endpoint to check application health
-app.get('/health', (req, res) => {
-    res.json({ status: 'MCP server is running', timestamp: new Date() });
+/** Health check endpoint (public). */
+app.get('/health', (_req, res) => {
+    res.json({ status: 'MCP server is running', timestamp: new Date().toISOString() });
 });
 
-// Function to run periodic tasks
+// ---------------------------------------------------------------------------
+// Periodic maintenance tasks
+// ---------------------------------------------------------------------------
 async function runPeriodicTasks() {
     try {
-        logMessage('Starting periodic repository update...');
         await executeCommand('git', ['pull', 'origin', 'main'], 'Periodic repository update');
-
-        logMessage('Starting periodic security audit...');
         await executeCommand('npm', ['audit', 'fix'], 'Periodic npm audit');
         await executeCommand('composer', ['update'], 'Periodic composer update');
-
         logMessage('Periodic tasks completed successfully.');
     } catch (error) {
         logMessage(`Periodic tasks encountered an error: ${error.message}`);
     }
 }
 
-// Schedule periodic tasks every hour
-setInterval(runPeriodicTasks, 60 * 60 * 1000);
+setInterval(runPeriodicTasks, PERIODIC_INTERVAL_MS);
 
-// Start the server
+// ---------------------------------------------------------------------------
+// Start
+// ---------------------------------------------------------------------------
 app.listen(PORT, HOST, () => {
     logMessage(`MCP server is running on http://${HOST}:${PORT}`);
 });
