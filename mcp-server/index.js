@@ -27,7 +27,7 @@ server.registerTool('runGitHubChecks', {
   return new Promise((resolve, reject) => {
     execFile('gh', ['workflow', 'run', '--repo', REPO, '--all'], (error, stdout, stderr) => {
       if (error) {
-        reject(new Error(stderr ? `${error.message}: ${stderr}` : error.message));
+        reject(new Error(error.message));
       } else {
         resolve({
           content: [{ type: 'text', text: stdout }],
@@ -45,7 +45,7 @@ server.registerTool('updateDependencies', {
   return new Promise((resolve, reject) => {
     execFile('npm', ['update'], { cwd: path.resolve(__dirname, '../') }, (error, stdout, stderr) => {
       if (error) {
-        reject(new Error(stderr ? `${error.message}: ${stderr}` : error.message));
+        reject(new Error(error.message));
       } else {
         resolve({
           content: [{ type: 'text', text: stdout }],

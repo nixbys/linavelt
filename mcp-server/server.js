@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const app = express();
-const PORT = process.env.MCP_PORT ? parseInt(process.env.MCP_PORT, 10) : 4000;
+const _rawPort = parseInt(process.env.MCP_PORT, 10);
+const PORT = (_rawPort >= 1 && _rawPort <= 65535) ? _rawPort : 4000;
 const HOST = process.env.MCP_HOST_BIND || '127.0.0.1';
 const LOG_FILE = path.join(__dirname, 'server.log');
 
