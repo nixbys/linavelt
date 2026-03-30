@@ -26,3 +26,6 @@ mcp-server/scheduler.log
 /.zed
 # Ignore extracted actions-runner directory
 actions-runner/
+# Electron build output
+/release/
+/dist-electron/

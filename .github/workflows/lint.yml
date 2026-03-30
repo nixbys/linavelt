@@ -38,6 +38,8 @@ jobs:
 
       - name: Install JS Dependencies
         run: npm install
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
 
       - name: Check and Update Composer Dependencies
         run: |
