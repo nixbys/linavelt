@@ -1,9 +1,55 @@
 {
     "private": true,
     "type": "module",
+    "main": "electron/main.cjs",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "electron:start": "electron .",
+        "electron:pack": "electron-builder --dir",
+        "electron:build": "npm run build && electron-builder"
+    },
+    "build": {
+        "appId": "com.linavelt.app",
+        "productName": "Linavelt",
+        "directories": {
+            "output": "release"
+        },
+        "files": [
+            "electron/**/*",
+            "public/**/*",
+            "!node_modules/**/*"
+        ],
+        "extraResources": [
+            {
+                "from": ".",
+                "to": "app",
+                "filter": [
+                    "app/**/*",
+                    "bootstrap/**/*",
+                    "config/**/*",
+                    "database/**/*",
+                    "resources/**/*",
+                    "routes/**/*",
+                    "storage/**/*",
+                    "artisan",
+                    "composer.json",
+                    "composer.lock",
+                    "public/**/*",
+                    "vendor/**/*"
+                ]
+            }
+        ],
+        "linux": {
+            "target": "AppImage",
+            "category": "Utility"
+        },
+        "mac": {
+            "target": "dmg"
+        },
+        "win": {
+            "target": "nsis"
+        }
     },
     "dependencies": {
         "@tailwindcss/aspect-ratio": "^0.4.2",
@@ -24,6 +70,11 @@
         "lightningcss-linux-x64-gnu": "^1.29.1"
     },
     "devDependencies": {
-        "@ljharb/tsconfig": "^0.3.2"
+        "@ljharb/tsconfig": "^0.3.2",
+        "electron": "^35.0.0",
+        "electron-builder": "^26.0.0"
+    },
+    "engines": {
+        "node": ">=22"
     }
 }
