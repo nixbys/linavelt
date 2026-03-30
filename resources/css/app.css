@@ -8,15 +8,9 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-<<<<<<< HEAD
-/* 
- * This section defines a custom CSS at-rule named `@theme`.
- * The `@theme` rule is likely a user-defined or framework-specific construct 
-=======
 /*
  * This section defines a custom CSS at-rule named `@theme`.
  * The `@theme` rule is likely a user-defined or framework-specific construct
->>>>>>> 2725d18 (feat: add Tailwind CSS configuration and update dependencies)
  * that is not natively recognized by standard CSS parsers or linters.
  * Ensure that the CSS preprocessor or framework being used supports `@theme`.
  * If this is intentional, you may need to configure your linter to ignore this rule.
