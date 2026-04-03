@@ -43,11 +43,13 @@ function requireApiKey(req, res, next) {
     }
 
     const provided = req.headers['x-api-key'] || '';
-    // Hash both values before comparing to normalise length (timingSafeEqual requires equal-length buffers).
-    const providedHash = crypto.createHash('sha256').update(provided).digest();
-    const expectedHash = crypto.createHash('sha256').update(API_KEY).digest();
+    const providedBuf = Buffer.from(provided);
+    const expectedBuf = Buffer.from(API_KEY);
+    // Reject when lengths differ to avoid timingSafeEqual throwing; then compare bytes directly.
+    const isValid = providedBuf.length === expectedBuf.length &&
+        crypto.timingSafeEqual(providedBuf, expectedBuf);
 
-    if (!crypto.timingSafeEqual(providedHash, expectedHash)) {
+    if (!isValid) {
         logMessage(`Unauthorized request to ${req.path} from ${req.ip}`);
         return res.status(401).json({ message: 'Unauthorized: valid X-Api-Key header required.' });
     }
@@ -60,11 +62,13 @@ function requireApiKey(req, res, next) {
 // ---------------------------------------------------------------------------
 function executeCommand(file, args, description) {
     return new Promise((resolve, reject) => {
-        execFile(file, args, { cwd: process.cwd() }, (error, stdout) => {
+        execFile(file, args, { cwd: process.cwd() }, (error, stdout, stderr) => {
             if (error) {
-                logMessage(`${description} failed: ${error.message}`);
+                const detail = stderr ? `${error.message}\n${stderr.trim()}` : error.message;
+                logMessage(`${description} failed: ${detail}`);
                 reject(error);
             } else {
+                if (stderr) logMessage(`${description} stderr: ${stderr.trim()}`);
                 logMessage(`${description} succeeded: ${stdout.trim()}`);
                 resolve(stdout);
             }

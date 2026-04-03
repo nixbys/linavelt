@@ -36,10 +36,20 @@ server.registerTool('runGitHubChecks', {
         };
     }
 
+    // Validate format: owner/repo — both parts must start with an alphanumeric character.
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\/[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(REPO)) {
+        return {
+            content: [{
+                type: 'text',
+                text: `GITHUB_REPOSITORY value "${REPO}" does not match expected owner/repo format.`,
+            }],
+        };
+    }
+
     return new Promise((resolve, reject) => {
-        execFile('gh', ['workflow', 'run', '--repo', REPO, '--all'], (error, stdout) => {
+        execFile('gh', ['workflow', 'run', '--repo', REPO, '--all'], (error, stdout, stderr) => {
             if (error) {
-                reject(new Error(error.message));
+                reject(new Error(stderr ? `${error.message}: ${stderr.trim()}` : error.message));
             } else {
                 resolve({ content: [{ type: 'text', text: stdout }] });
             }
@@ -56,9 +66,9 @@ server.registerTool('updateDependencies', {
     inputSchema: {},
 }, async () => {
     return new Promise((resolve, reject) => {
-        execFile('npm', ['update'], { cwd: path.resolve(__dirname, '../') }, (error, stdout) => {
+        execFile('npm', ['update'], { cwd: path.resolve(__dirname, '../') }, (error, stdout, stderr) => {
             if (error) {
-                reject(new Error(error.message));
+                reject(new Error(stderr ? `${error.message}: ${stderr.trim()}` : error.message));
             } else {
                 resolve({ content: [{ type: 'text', text: stdout }] });
             }
