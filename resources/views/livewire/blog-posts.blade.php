@@ -1,3 +1,3 @@
 <div>
-    {{-- The Master doesn't talk, he acts. --}}
+    {{-- Dynamic blog posts loaded via Livewire --}}
 </div>

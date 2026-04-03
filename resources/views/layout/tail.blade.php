@@ -4,7 +4,7 @@
 @endif
 
 @section('scripts')
-<script src="{{ asset('js/app.js') }}"></script>
+@vite('resources/js/app.js')
 @show
 
 @if(config('h5b.ga'))

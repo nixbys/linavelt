@@ -1,81 +1,113 @@
+'use strict';
+
 const { McpServer } = require('./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/mcp');
 const { StdioServerTransport } = require('./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/stdio');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
+const REPO = process.env.GITHUB_REPOSITORY || '';
+
+// ---------------------------------------------------------------------------
+// MCP Server instance
+// ---------------------------------------------------------------------------
 const server = new McpServer({
-  name: 'laravel-maintenance',
-  version: '1.0.0',
+    name: 'laravel-maintenance',
+    version: '1.0.0',
 });
 
+// ---------------------------------------------------------------------------
+// Tool: Run GitHub Workflow Checks
+// ---------------------------------------------------------------------------
 server.registerTool('runGitHubChecks', {
-  title: 'Run GitHub Workflow Checks',
-  description: 'Executes GitHub workflow checks and resolves any issues.',
-  inputSchema: {},
+    title: 'Run GitHub Workflow Checks',
+    description: 'Triggers all GitHub Actions workflow runs for the configured repository.',
+    inputSchema: {},
 }, async () => {
-  return new Promise((resolve, reject) => {
-    exec('gh workflow run --repo <your-repo> --all', (error, stdout, stderr) => {
-      if (error) {
-        reject(`Error: ${stderr}`);
-      } else {
-        resolve({
-          content: [{ type: 'text', text: stdout }],
+    if (!REPO) {
+        return {
+            content: [{
+                type: 'text',
+                text: 'GITHUB_REPOSITORY environment variable is not set. Cannot run workflow checks.',
+            }],
+        };
+    }
+
+    // Validate format: owner/repo — both parts must start with an alphanumeric character.
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\/[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(REPO)) {
+        return {
+            content: [{
+                type: 'text',
+                text: `GITHUB_REPOSITORY value "${REPO}" does not match expected owner/repo format.`,
+            }],
+        };
+    }
+
+    return new Promise((resolve, reject) => {
+        execFile('gh', ['workflow', 'run', '--repo', REPO, '--all'], (error, stdout, stderr) => {
+            if (error) {
+                reject(new Error(stderr ? `${error.message}: ${stderr.trim()}` : error.message));
+            } else {
+                resolve({ content: [{ type: 'text', text: stdout }] });
+            }
         });
-      }
     });
-  });
 });
 
+// ---------------------------------------------------------------------------
+// Tool: Update Dependencies
+// ---------------------------------------------------------------------------
 server.registerTool('updateDependencies', {
-  title: 'Update Dependencies',
-  description: 'Updates project dependencies to the latest versions.',
-  inputSchema: {},
+    title: 'Update Dependencies',
+    description: 'Updates project npm dependencies to the latest compatible versions.',
+    inputSchema: {},
 }, async () => {
-  return new Promise((resolve, reject) => {
-    exec('npm update', { cwd: path.resolve(__dirname, '../') }, (error, stdout, stderr) => {
-      if (error) {
-        reject(`Error: ${stderr}`);
-      } else {
-        resolve({
-          content: [{ type: 'text', text: stdout }],
+    return new Promise((resolve, reject) => {
+        execFile('npm', ['update'], { cwd: path.resolve(__dirname, '../') }, (error, stdout, stderr) => {
+            if (error) {
+                reject(new Error(stderr ? `${error.message}: ${stderr.trim()}` : error.message));
+            } else {
+                resolve({ content: [{ type: 'text', text: stdout }] });
+            }
         });
-      }
     });
-  });
 });
 
+// ---------------------------------------------------------------------------
+// Tool: Log Changes
+// ---------------------------------------------------------------------------
 server.registerTool('logChanges', {
-  title: 'Log Changes',
-  description: 'Logs changes made to the project.',
-  inputSchema: {},
+    title: 'Log Changes',
+    description: 'Appends a timestamped entry to the changes log.',
+    inputSchema: {},
 }, async () => {
-  const logPath = path.resolve(__dirname, 'changes.log');
-  const logMessage = `Changes logged at ${new Date().toISOString()}\n`;
+    const logPath = path.resolve(__dirname, 'changes.log');
+    const entry = `Changes logged at ${new Date().toISOString()}\n`;
 
-  return new Promise((resolve, reject) => {
-    fs.appendFile(logPath, logMessage, (error) => {
-      if (error) {
-        reject(`Error: ${error.message}`);
-      } else {
-        resolve({
-          content: [{ type: 'text', text: 'Changes logged successfully.' }],
+    return new Promise((resolve, reject) => {
+        fs.appendFile(logPath, entry, (error) => {
+            if (error) {
+                reject(new Error(error.message));
+            } else {
+                resolve({ content: [{ type: 'text', text: 'Changes logged successfully.' }] });
+            }
         });
-      }
     });
-  });
 });
 
+// ---------------------------------------------------------------------------
+// Bootstrap
+// ---------------------------------------------------------------------------
 async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('Laravel Maintenance MCP Server is running.');
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    console.error('Laravel Maintenance MCP Server is running.');
 }
 
 main().catch((error) => {
-  console.error('Fatal error in main():', error);
-  process.exit(1);
+    console.error('Fatal error in main():', error);
+    process.exit(1);
 });
