@@ -35,6 +35,8 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
 
 // Admin Routes
-Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+});
 
 require __DIR__.'/auth.php';

@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class BlogController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        // Fetch blog posts dynamically (example data for now)
         $posts = [
             [
                 'title' => 'First Blog Post',
