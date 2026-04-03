@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function dashboard(): View
     {
-        // Fetch admin data dynamically (example data for now)
         $data = [
             'users' => 120,
             'posts' => 45,
