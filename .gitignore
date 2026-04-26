@@ -21,6 +21,11 @@ yarn-error.log
 # MCP scheduler runtime state
 mcp-server/scheduler-state.json
 mcp-server/scheduler.log
+mcp-server/.mcp-server.pid
+mcp-server/.mcp-scheduler.pid
+mcp-server/security-automation-state.json
+mcp-server/security-automation.log
+mcp-server/security-reports/
 /.nova
 /.vscode
 /.zed
