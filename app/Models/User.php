@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,7 +11,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<UserFactory> */
+    /** @use HasFactory */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
@@ -24,6 +23,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'onboarding_preferences',
+        'onboarding_completed_at',
+        'module_generation_status',
+        'module_generation_started_at',
+        'module_generation_completed_at',
     ];
 
     /**
@@ -46,6 +50,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'onboarding_preferences' => 'array',
+            'onboarding_completed_at' => 'datetime',
+            'module_generation_started_at' => 'datetime',
+            'module_generation_completed_at' => 'datetime',
         ];
     }
 

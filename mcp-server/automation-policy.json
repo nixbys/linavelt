@@ -1,0 +1,92 @@
+{
+  "profiles": {
+    "default": {
+      "dailyAudit": true,
+      "repoHealth": true,
+      "weeklyUpdate": true,
+      "learning": {
+        "enabled": true
+      },
+      "steps": {
+        "composer-validate": true,
+        "style-fix": true,
+        "npm-audit-root": true,
+        "npm-audit-mcp": true,
+        "composer-audit": true,
+        "composer-update": true,
+        "build": true,
+        "tests": true
+      },
+      "maintenance": {
+        "cleanupMergedBranches": true,
+        "reportOpenPrFailures": true
+      }
+    },
+    "ci": {
+      "dailyAudit": false,
+      "repoHealth": true,
+      "weeklyUpdate": false,
+      "learning": {
+        "enabled": false
+      },
+      "steps": {
+        "composer-validate": true,
+        "style-fix": true,
+        "npm-audit-root": false,
+        "npm-audit-mcp": false,
+        "composer-audit": true,
+        "composer-update": false,
+        "build": true,
+        "tests": true
+      },
+      "maintenance": {
+        "cleanupMergedBranches": false,
+        "reportOpenPrFailures": false
+      }
+    },
+    "maintenance-light": {
+      "dailyAudit": true,
+      "repoHealth": true,
+      "weeklyUpdate": true,
+      "learning": {
+        "enabled": true
+      },
+      "steps": {
+        "composer-validate": true,
+        "style-fix": true,
+        "npm-audit-root": true,
+        "npm-audit-mcp": true,
+        "composer-audit": true,
+        "composer-update": false,
+        "build": true,
+        "tests": true
+      },
+      "maintenance": {
+        "cleanupMergedBranches": true,
+        "reportOpenPrFailures": true
+      }
+    },
+    "production-strict": {
+      "dailyAudit": true,
+      "repoHealth": true,
+      "weeklyUpdate": true,
+      "learning": {
+        "enabled": true
+      },
+      "steps": {
+        "composer-validate": true,
+        "style-fix": true,
+        "npm-audit-root": true,
+        "npm-audit-mcp": true,
+        "composer-audit": true,
+        "composer-update": true,
+        "build": true,
+        "tests": true
+      },
+      "maintenance": {
+        "cleanupMergedBranches": false,
+        "reportOpenPrFailures": true
+      }
+    }
+  }
+}

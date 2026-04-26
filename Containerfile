@@ -1,5 +1,5 @@
-# Base image for Laravel
-FROM fedora:latest
+# ── Stage 1: builder ─────────────────────────────────────────────────────────
+FROM fedora:latest AS builder
 
 # Install system dependencies
 RUN dnf -y update && dnf -y install \
@@ -12,34 +12,65 @@ RUN dnf -y update && dnf -y install \
     php-bcmath \
     php-json \
     php-curl \
+    php-zip \
     nodejs \
     npm \
-    composer \
     git \
     unzip \
     && dnf clean all
 
-# Set working directory
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 WORKDIR /var/www/html
 
-# Copy Laravel app
+# Copy dependency manifests first for layer caching
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+COPY package.json package-lock.json* ./
+RUN npm ci --ignore-scripts
+
+# Copy the rest of the application
 COPY . .
 
-# Add a non-root user for running the application
-RUN useradd -m -s /bin/bash appuser
+# Remove secrets before they reach the runtime stage
+RUN rm -f .env storage/oauth-private.key storage/oauth-public.key
 
-# Switch to the non-root user
+# Finish composer autoloader and npm build
+RUN composer dump-autoload --optimize
+RUN npm run build
+
+# Fix permissions while still root
+RUN useradd -r -s /bin/false -u 1001 appuser \
+    && chown -R appuser:appuser /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
+
+# ── Stage 2: runtime ─────────────────────────────────────────────────────────
+FROM fedora:latest AS final
+
+RUN dnf -y update && dnf -y install \
+    php \
+    php-cli \
+    php-mysqlnd \
+    php-pdo \
+    php-mbstring \
+    php-xml \
+    php-bcmath \
+    php-json \
+    php-curl \
+    php-zip \
+    && dnf clean all
+
+RUN useradd -r -s /bin/false -u 1001 appuser
+
+WORKDIR /var/www/html
+
+COPY --from=builder --chown=appuser:appuser /var/www/html .
+
+EXPOSE 8000
+
 USER appuser
 
-# Remove sensitive files from the image
-RUN rm -rf /var/www/html/.env /var/www/html/storage/oauth-private.key /var/www/html/storage/oauth-public.key
-
-# Ensure proper permissions for the copied files
-RUN chmod -R 755 /var/www/html && chown -R appuser:appuser /var/www/html
-
-# Enable multi-stage builds to reduce image size
-FROM scratch AS final
-COPY --from=0 /var/www/html /var/www/html
-
-# Final CMD remains unchanged
-CMD ["npm", "run", "electron:start"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
