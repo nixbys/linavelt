@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\BuilderOnboardingController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
@@ -13,6 +14,14 @@ Route::get('/', function () {
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::get('builder/onboarding', [BuilderOnboardingController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('builder.onboarding');
+
+Route::post('builder/onboarding', [BuilderOnboardingController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('builder.onboarding.update');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
