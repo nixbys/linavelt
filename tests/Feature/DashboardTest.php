@@ -24,4 +24,24 @@ class DashboardTest extends TestCase
         $response = $this->get(route('dashboard'));
         $response->assertStatus(200);
     }
+
+    public function test_dashboard_displays_saved_stack_profile_for_authenticated_users(): void
+    {
+        $user = User::factory()->create([
+            'onboarding_preferences' => [
+                'frontend_layer' => 'Livewire + Flux',
+                'backend_layer' => 'Laravel Monolith',
+                'data_integrations' => 'MySQL + Queues',
+            ],
+            'onboarding_completed_at' => now()->subHour(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Saved Stack Profile')
+            ->assertSeeText('Livewire + Flux')
+            ->assertSeeText('Completed');
+    }
 }

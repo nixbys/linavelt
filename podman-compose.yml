@@ -1,4 +1,8 @@
 version: "3.8"
+
+networks:
+  linavelt:
+
 services:
   app:
     build:
@@ -6,18 +10,36 @@ services:
       dockerfile: Containerfile
     ports:
       - "8000:8000"
-    volumes:
-      - .:/var/www/html
-    command: npm run electron:start
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: laravel
+      DB_USERNAME: laravel
+      DB_PASSWORD: password
+      QUEUE_CONNECTION: database
+    depends_on:
+      db:
+        condition: service_healthy
     security_opt:
       - no-new-privileges:true
     read_only: true
     tmpfs:
       - /tmp
-    user: appuser
+      - /var/www/html/storage/framework/cache
+      - /var/www/html/storage/framework/sessions
+      - /var/www/html/storage/framework/views
+      - /var/www/html/storage/logs
+      - /var/www/html/bootstrap/cache
+    user: "1001:1001"
+    networks:
+      - linavelt
 
   db:
-    image: mariadb:10.5
+    image: mariadb:10.11
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: laravel
@@ -25,7 +47,15 @@ services:
       MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
-    runtime: runc
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - linavelt
 
   mcp-server:
     build:
@@ -34,5 +64,12 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./mcp-server:/usr/src/app
-    restart: always
+      - ./mcp-server:/usr/src/app:ro
+    restart: on-failure:3
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - linavelt
+
+volumes:
+  db_data:

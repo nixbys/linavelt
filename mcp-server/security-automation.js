@@ -9,11 +9,14 @@ const MCP_DIR = __dirname;
 const STATE_FILE = path.join(MCP_DIR, 'security-automation-state.json');
 const REPORT_DIR = path.join(MCP_DIR, 'security-reports');
 const LOG_FILE = path.join(MCP_DIR, 'security-automation.log');
+const LEARNING_FILE = path.join(MCP_DIR, 'automation-learning.json');
+const POLICY_FILE = path.join(MCP_DIR, 'automation-policy.json');
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const ONE_WEEK_MS = 7 * ONE_DAY_MS;
 const WEEKLY_BRANCH = 'automation/weekly-security-update';
 const WEEKLY_COMMIT_TITLE = 'Weekly Security Update';
+const HEALTH_BRANCH_PREFIX = 'automation/repo-health-fix';
 
 function log(message) {
     const line = `[${new Date().toISOString()}] ${message}`;
@@ -25,12 +28,75 @@ function loadState() {
     try {
         return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
     } catch {
-        return { lastDailyAuditAt: 0, lastWeeklyPushAt: 0 };
+        return { lastDailyAuditAt: 0, lastWeeklyPushAt: 0, lastRepoHealthFixAt: 0 };
     }
 }
 
 function saveState(state) {
     fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+}
+
+function defaultPolicy() {
+    return {
+        profile: 'default',
+        dailyAudit: true,
+        repoHealth: true,
+        weeklyUpdate: true,
+        learning: { enabled: true },
+        steps: {
+            'composer-validate': true,
+            'style-fix': true,
+            'npm-audit-root': true,
+            'npm-audit-mcp': true,
+            'composer-audit': true,
+            'composer-update': true,
+            build: true,
+            tests: true,
+        },
+        maintenance: {
+            cleanupMergedBranches: true,
+            reportOpenPrFailures: true,
+        },
+    };
+}
+
+function loadPolicyFile() {
+    try {
+        return JSON.parse(fs.readFileSync(POLICY_FILE, 'utf8'));
+    } catch {
+        return { profiles: { default: defaultPolicy() } };
+    }
+}
+
+function resolvePolicy() {
+    const policyFile = loadPolicyFile();
+    const profileName = process.env.AUTOMATION_POLICY_PROFILE || 'default';
+    const defaults = defaultPolicy();
+    const profile = policyFile && policyFile.profiles && policyFile.profiles[profileName]
+        ? policyFile.profiles[profileName]
+        : {};
+
+    return {
+        ...defaults,
+        ...profile,
+        profile: profileName,
+        learning: {
+            ...defaults.learning,
+            ...((profile && profile.learning) || {}),
+        },
+        steps: {
+            ...defaults.steps,
+            ...((profile && profile.steps) || {}),
+        },
+        maintenance: {
+            ...defaults.maintenance,
+            ...((profile && profile.maintenance) || {}),
+        },
+    };
+}
+
+function isStepEnabled(policy, stepId) {
+    return !(policy && policy.steps && policy.steps[stepId] === false);
 }
 
 function isDue(lastRunAt, intervalMs) {
@@ -365,21 +431,47 @@ async function waitForChecksToBeQueued(repositorySlug, prNumber, timeoutMs = 90_
  * on the PR and throws if any are not in a passing or skipped terminal state.
  */
 async function assertAllChecksPassed(repositorySlug, prNumber) {
-    const result = await runCommand('gh', [
-        'pr', 'checks', String(prNumber),
-        '--repo', repositorySlug,
-        '--json', 'name,state,conclusion',
-    ], { allowFailure: true });
+    let checks = null;
 
-    if (result.code !== 0) {
-        log('[checks] WARNING: could not read final check states — assuming pass.');
-        return;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+        const result = await runCommand('gh', [
+            'pr', 'checks', String(prNumber),
+            '--repo', repositorySlug,
+            '--json', 'name,state,conclusion',
+        ], { allowFailure: true });
+
+        const parsed = parseJsonOrNull(result.stdout);
+        if (result.code === 0 && Array.isArray(parsed) && parsed.length) {
+            checks = parsed;
+            break;
+        }
+
+        if (attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, 4_000));
+        }
     }
 
-    const checks = parseJsonOrNull(result.stdout);
+    if (!checks) {
+        // Fallback: fetch aggregated status checks from PR view.
+        const fallback = await runCommand('gh', [
+            'pr', 'view', String(prNumber),
+            '--repo', repositorySlug,
+            '--json', 'statusCheckRollup',
+        ], { allowFailure: true });
+
+        const parsed = parseJsonOrNull(fallback.stdout);
+        const rollup = parsed && parsed.statusCheckRollup;
+        if (Array.isArray(rollup) && rollup.length) {
+            checks = rollup.map(item => ({
+                name: item.name || item.context || 'unknown-check',
+                state: item.conclusion || item.state || item.status || 'unknown',
+                conclusion: item.conclusion || item.state || item.status || 'unknown',
+            }));
+        }
+    }
+
     if (!Array.isArray(checks) || checks.length === 0) {
-        log('[checks] WARNING: no check data returned for final verification.');
-        return;
+        throw new Error('[checks] Could not verify final check states from GitHub after retries/fallback.');
     }
 
     const PASSING = new Set(['pass', 'success', 'skipped', 'neutral']);
@@ -391,6 +483,81 @@ async function assertAllChecksPassed(repositorySlug, prNumber) {
     }
 
     log(`[checks] All ${checks.length} workflow check(s) passed.`);
+}
+
+async function listPrFailedChecks(repositorySlug, prNumber) {
+    const result = await runCommand('gh', [
+        'pr', 'checks', String(prNumber),
+        '--repo', repositorySlug,
+        '--json', 'name,state,conclusion',
+    ], { allowFailure: true });
+
+    if (result.code !== 0) {
+        return [];
+    }
+
+    const checks = parseJsonOrNull(result.stdout);
+    if (!Array.isArray(checks)) {
+        return [];
+    }
+
+    const FAILING = new Set(['failure', 'error', 'failed', 'cancelled', 'timed_out']);
+    return checks.filter(check => {
+        const state = String(check.state || '').toLowerCase();
+        const conclusion = String(check.conclusion || '').toLowerCase();
+        return FAILING.has(state) || FAILING.has(conclusion);
+    });
+}
+
+async function getPrManagedCommentIds(repositorySlug, prNumber, marker) {
+    const result = await runCommand('gh', [
+        'pr', 'view', String(prNumber),
+        '--repo', repositorySlug,
+        '--json', 'comments',
+    ], { allowFailure: true });
+
+    if (result.code !== 0) {
+        return [];
+    }
+
+    const parsed = parseJsonOrNull(result.stdout);
+    const comments = parsed && Array.isArray(parsed.comments) ? parsed.comments : [];
+    return comments
+        .filter(comment => comment && typeof comment.body === 'string' && comment.body.includes(marker))
+        .map(comment => comment.id)
+        .filter(Boolean);
+}
+
+async function deleteIssueComment(repositorySlug, commentId) {
+    await runCommand('gh', [
+        'api', '--method', 'DELETE',
+        `repos/${repositorySlug}/issues/comments/${commentId}`,
+    ], { allowFailure: true });
+}
+
+async function upsertManagedPrComment(repositorySlug, prNumber, marker, body) {
+    const existingIds = await getPrManagedCommentIds(repositorySlug, prNumber, marker);
+
+    if (existingIds.length > 0) {
+        await runCommand('gh', [
+            'api', '--method', 'PATCH',
+            `repos/${repositorySlug}/issues/comments/${existingIds[0]}`,
+            '--field', `body=${body}`,
+        ], { allowFailure: true });
+
+        // Guardrail: remove accidental duplicates and keep only one managed comment.
+        for (const duplicateId of existingIds.slice(1)) {
+            await deleteIssueComment(repositorySlug, duplicateId);
+        }
+
+        return;
+    }
+
+    await runCommand('gh', [
+        'pr', 'comment', String(prNumber),
+        '--repo', repositorySlug,
+        '--body', body,
+    ], { allowFailure: true });
 }
 
 /**
@@ -427,13 +594,24 @@ async function runPrePushChecks(repositorySlug) {
     return { unresolvedPrs, staleBranches };
 }
 
-async function runWorkflowEquivalentChecks() {
+async function runWorkflowEquivalentChecks(policy) {
     log('Running local workflow-equivalent checks before push.');
 
-    await runCommand('composer', ['validate'], { cwd: REPO_ROOT });
-    await runCommand(path.join(REPO_ROOT, 'vendor/bin/pint'), [], { cwd: REPO_ROOT });
-    await runCommand('npm', ['run', 'build'], { cwd: REPO_ROOT });
-    await runCommand(path.join(REPO_ROOT, 'vendor/bin/phpunit'), [], { cwd: REPO_ROOT });
+    if (isStepEnabled(policy, 'composer-validate')) {
+        await runCommand('composer', ['validate'], { cwd: REPO_ROOT });
+    }
+
+    if (isStepEnabled(policy, 'style-fix')) {
+        await runCommand(path.join(REPO_ROOT, 'vendor/bin/pint'), [], { cwd: REPO_ROOT });
+    }
+
+    if (isStepEnabled(policy, 'build')) {
+        await runCommand('npm', ['run', 'build'], { cwd: REPO_ROOT });
+    }
+
+    if (isStepEnabled(policy, 'tests')) {
+        await runCommand(path.join(REPO_ROOT, 'vendor/bin/phpunit'), [], { cwd: REPO_ROOT });
+    }
 }
 
 async function upsertWeeklyPr(repositorySlug, prFindings) {
@@ -509,7 +687,7 @@ async function upsertWeeklyPr(repositorySlug, prFindings) {
     return prNumber;
 }
 
-async function runWeeklyUpdate(state) {
+async function runWeeklyUpdate(state, policy) {
     log('Starting weekly security update pipeline.');
 
     if (!await hasCommand('gh')) {
@@ -528,11 +706,17 @@ async function runWeeklyUpdate(state) {
         await runCommand('git', ['checkout', '-B', WEEKLY_BRANCH, 'origin/main'], { cwd: REPO_ROOT });
 
         log('Applying automated security fixes and dependency updates.');
-        await runCommand('npm', ['audit', 'fix'], { cwd: REPO_ROOT, allowFailure: true });
-        await runCommand('composer', ['update', '--with-all-dependencies', '--no-interaction'], { cwd: REPO_ROOT, allowFailure: true });
-        await runCommand('npm', ['audit', 'fix'], { cwd: MCP_DIR, allowFailure: true });
+        if (isStepEnabled(policy, 'npm-audit-root')) {
+            await runCommand('npm', ['audit', 'fix'], { cwd: REPO_ROOT, allowFailure: true });
+        }
+        if (isStepEnabled(policy, 'composer-update')) {
+            await runCommand('composer', ['update', '--with-all-dependencies', '--no-interaction'], { cwd: REPO_ROOT, allowFailure: true });
+        }
+        if (isStepEnabled(policy, 'npm-audit-mcp')) {
+            await runCommand('npm', ['audit', 'fix'], { cwd: MCP_DIR, allowFailure: true });
+        }
 
-        await runWorkflowEquivalentChecks();
+        await runWorkflowEquivalentChecks(policy);
 
         // Guard: abort if the weekly branch already has unresolved failing runs
         await assertWeeklyBranchNotFailing(repositorySlug);
@@ -573,17 +757,411 @@ async function runWeeklyUpdate(state) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Repo-wide health automation with self-learning
+// ---------------------------------------------------------------------------
+
+function loadLearning() {
+    try {
+        const parsed = JSON.parse(fs.readFileSync(LEARNING_FILE, 'utf8'));
+        if (!parsed || typeof parsed !== 'object') {
+            return { failures: {}, runs: 0, lastRunAt: null };
+        }
+
+        return {
+            failures: parsed.failures && typeof parsed.failures === 'object' ? parsed.failures : {},
+            runs: Number.isFinite(parsed.runs) ? parsed.runs : 0,
+            lastRunAt: typeof parsed.lastRunAt === 'string' ? parsed.lastRunAt : null,
+        };
+    } catch {
+        return { failures: {}, runs: 0, lastRunAt: null };
+    }
+}
+
+function saveLearning(learning) {
+    fs.writeFileSync(LEARNING_FILE, JSON.stringify(learning, null, 2));
+}
+
+function detectFailureCategories(output) {
+    const text = String(output || '').toLowerCase();
+    const categories = [];
+
+    if (/pint|psr-12|style issues|code style/.test(text)) categories.push('style');
+    if (/phpunit|assert|tests?:|failures!|exception/.test(text)) categories.push('tests');
+    if (/npm audit|vulnerab|critical|high/.test(text)) categories.push('npm-audit');
+    if (/composer audit|advisories|abandoned/.test(text)) categories.push('composer-audit');
+    if (/npm run build|vite|rollup|build failed/.test(text)) categories.push('build');
+    if (/composer validate|composer\.json|schema/.test(text)) categories.push('composer-validate');
+    if (/permission denied|eacces|operation not permitted/.test(text)) categories.push('permissions');
+
+    if (!categories.length) {
+        categories.push('unknown');
+    }
+
+    return categories;
+}
+
+function learnFromStage(learning, stage, result) {
+    const now = new Date().toISOString();
+    const exitCode = result && Number.isFinite(result.code) ? result.code : 1;
+    const output = `${result?.stdout || ''}\n${result?.stderr || ''}`;
+
+    if (exitCode === 0) {
+        return;
+    }
+
+    for (const category of detectFailureCategories(output)) {
+        if (!learning.failures[category]) {
+            learning.failures[category] = {
+                count: 0,
+                lastStage: stage,
+                lastSeenAt: now,
+            };
+        }
+
+        learning.failures[category].count += 1;
+        learning.failures[category].lastStage = stage;
+        learning.failures[category].lastSeenAt = now;
+    }
+}
+
+function getPrioritizedHealthSteps(learning) {
+    const frequency = learning.failures || {};
+    const score = category => (frequency[category] && frequency[category].count) || 0;
+
+    const steps = [
+        { id: 'composer-validate', category: 'composer-validate' },
+        { id: 'style-fix', category: 'style' },
+        { id: 'npm-audit-root', category: 'npm-audit' },
+        { id: 'npm-audit-mcp', category: 'npm-audit' },
+        { id: 'composer-audit', category: 'composer-audit' },
+        { id: 'composer-update', category: 'composer-audit' },
+        { id: 'build', category: 'build' },
+        { id: 'tests', category: 'tests' },
+    ];
+
+    // Learned behavior: run historically failing categories earlier.
+    return steps.sort((a, b) => score(b.category) - score(a.category));
+}
+
+function learnFromFailedChecks(learning, failedChecks) {
+    if (!Array.isArray(failedChecks) || !failedChecks.length) {
+        return;
+    }
+
+    const now = new Date().toISOString();
+    for (const check of failedChecks) {
+        const name = String(check.name || 'unknown-workflow').toLowerCase();
+        let category = 'workflow-unknown';
+
+        if (name.includes('lint') || name.includes('pint')) category = 'style';
+        else if (name.includes('test')) category = 'tests';
+        else if (name.includes('codeql') || name.includes('ossar') || name.includes('security')) category = 'security-workflow';
+        else if (name.includes('build') || name.includes('deploy')) category = 'build';
+
+        if (!learning.failures[category]) {
+            learning.failures[category] = { count: 0, lastStage: 'workflow-checks', lastSeenAt: now };
+        }
+
+        learning.failures[category].count += 1;
+        learning.failures[category].lastStage = `workflow:${name}`;
+        learning.failures[category].lastSeenAt = now;
+    }
+}
+
+async function cleanupMergedBranches(repositorySlug) {
+    const merged = await runCommand('gh', [
+        'pr', 'list', '--repo', repositorySlug, '--state', 'merged', '--json', 'headRefName,number', '--limit', '100',
+    ], { allowFailure: true });
+
+    if (merged.code !== 0) {
+        return [];
+    }
+
+    const prs = parseJsonOrNull(merged.stdout);
+    if (!Array.isArray(prs) || !prs.length) {
+        return [];
+    }
+
+    const removed = [];
+    for (const pr of prs) {
+        const branch = pr.headRefName;
+        if (!branch || branch === 'main' || branch === WEEKLY_BRANCH || branch.startsWith(HEALTH_BRANCH_PREFIX)) {
+            continue;
+        }
+
+        const exists = await runCommand('git', ['ls-remote', '--exit-code', '--heads', 'origin', branch], { cwd: REPO_ROOT, allowFailure: true });
+        if (exists.code !== 0) {
+            continue;
+        }
+
+        const del = await runCommand('gh', [
+            'api', '--method', 'DELETE', `repos/${repositorySlug}/git/refs/heads/${encodeURIComponent(branch)}`,
+        ], { allowFailure: true });
+
+        if (del.code === 0) {
+            removed.push(branch);
+        }
+    }
+
+    return removed;
+}
+
+async function reportOpenPrFailures(repositorySlug) {
+    const marker = '<!-- mcp-security-automation -->';
+    const openPrs = await runCommand('gh', [
+        'pr', 'list', '--repo', repositorySlug, '--state', 'open', '--json', 'number,title', '--limit', '50',
+    ], { allowFailure: true });
+
+    if (openPrs.code !== 0) {
+        return 0;
+    }
+
+    const prs = parseJsonOrNull(openPrs.stdout);
+    if (!Array.isArray(prs) || !prs.length) {
+        return 0;
+    }
+
+    let count = 0;
+    for (const pr of prs) {
+        const failures = await listPrFailedChecks(repositorySlug, pr.number);
+        if (!failures.length) {
+            const managedCommentIds = await getPrManagedCommentIds(repositorySlug, pr.number, marker);
+            for (const id of managedCommentIds) {
+                await deleteIssueComment(repositorySlug, id);
+            }
+            continue;
+        }
+
+        const body = [
+            marker,
+            `Automated repo health check found ${failures.length} failing workflow check(s):`,
+            ...failures.map(item => `- ${item.name}: ${item.state || item.conclusion}`),
+        ].join('\n');
+
+        await upsertManagedPrComment(repositorySlug, pr.number, marker, body);
+        count += 1;
+    }
+
+    return count;
+}
+
+async function executeHealthStep(stepId) {
+    switch (stepId) {
+    case 'composer-validate':
+        return runCommand('composer', ['validate'], { cwd: REPO_ROOT, allowFailure: true });
+    case 'style-fix':
+        return runCommand(path.join(REPO_ROOT, 'vendor/bin/pint'), [], { cwd: REPO_ROOT, allowFailure: true });
+    case 'npm-audit-root':
+        return runCommand('npm', ['audit', 'fix'], { cwd: REPO_ROOT, allowFailure: true });
+    case 'npm-audit-mcp':
+        return runCommand('npm', ['audit', 'fix'], { cwd: MCP_DIR, allowFailure: true });
+    case 'composer-audit':
+        return runCommand('composer', ['audit', '--format=json'], { cwd: REPO_ROOT, allowFailure: true });
+    case 'composer-update':
+        return runCommand('composer', ['update', '--with-all-dependencies', '--no-interaction'], { cwd: REPO_ROOT, allowFailure: true });
+    case 'build':
+        return runCommand('npm', ['run', 'build'], { cwd: REPO_ROOT, allowFailure: true });
+    case 'tests':
+        return runCommand(path.join(REPO_ROOT, 'vendor/bin/phpunit'), [], { cwd: REPO_ROOT, allowFailure: true });
+    default:
+        return { code: 0, stdout: '', stderr: '' };
+    }
+}
+
+async function upsertHealthPr(repositorySlug, branchName, summary) {
+    const title = `Automated Repo Health Update (${new Date().toISOString().slice(0, 10)})`;
+    const body = [
+        'Automated repo-wide health remediation generated by MCP security automation.',
+        '',
+        '### Scope',
+        '- Security remediations (npm/composer)',
+        '- Style/lint remediations (Pint)',
+        '- Build and test verification',
+        '- Self-learning prioritization based on historical failures',
+        '',
+        '### Run Summary',
+        ...summary.map(line => `- ${line}`),
+    ].join('\n');
+
+    const prList = await runCommand('gh', [
+        'pr', 'list',
+        '--repo', repositorySlug,
+        '--head', branchName,
+        '--base', 'main',
+        '--state', 'open',
+        '--json', 'number',
+    ], { allowFailure: true });
+
+    const parsed = parseJsonOrNull(prList.stdout);
+    const existing = Array.isArray(parsed) && parsed.length ? parsed[0] : null;
+
+    if (existing) {
+        await runCommand('gh', [
+            'pr', 'edit', String(existing.number), '--repo', repositorySlug,
+            '--title', title, '--body', body,
+        ]);
+        return existing.number;
+    }
+
+    await runCommand('gh', [
+        'pr', 'create',
+        '--repo', repositorySlug,
+        '--base', 'main',
+        '--head', branchName,
+        '--title', title,
+        '--body', body,
+    ]);
+
+    const created = await runCommand('gh', [
+        'pr', 'list',
+        '--repo', repositorySlug,
+        '--head', branchName,
+        '--base', 'main',
+        '--state', 'open',
+        '--json', 'number',
+        '--jq', '.[0].number',
+    ]);
+
+    const prNumber = Number(created.stdout.trim());
+    if (!prNumber) {
+        throw new Error('Failed to locate newly created repo health PR.');
+    }
+
+    return prNumber;
+}
+
+async function runRepoHealthResolution(state, policy) {
+    log('Starting repo health resolution pipeline.');
+
+    if (!await hasCommand('gh')) {
+        throw new Error('GitHub CLI (gh) is required for repo health automation.');
+    }
+
+    const repositorySlug = await getRepositorySlug();
+    if (!repositorySlug) {
+        throw new Error('Unable to determine repository slug for repo health automation.');
+    }
+
+    const learningEnabled = !(policy && policy.learning && policy.learning.enabled === false);
+    const learning = learningEnabled ? loadLearning() : { failures: {}, runs: 0, lastRunAt: null };
+    learning.runs += 1;
+    learning.lastRunAt = new Date().toISOString();
+
+    const branchName = `${HEALTH_BRANCH_PREFIX}-${new Date().toISOString().slice(0, 10)}`;
+    const stashed = await stashIfDirty();
+
+    let pushedPrNumber = null;
+
+    try {
+        await runCommand('git', ['fetch', 'origin', 'main'], { cwd: REPO_ROOT });
+        await runCommand('git', ['checkout', '-B', branchName, 'origin/main'], { cwd: REPO_ROOT });
+
+        const orderedSteps = getPrioritizedHealthSteps(learning).filter(step => isStepEnabled(policy, step.id));
+        const summary = [];
+
+        if (!orderedSteps.length) {
+            log('[health] All repo-health steps are disabled by policy.');
+        }
+
+        for (const step of orderedSteps) {
+            log(`[health] Running step: ${step.id}`);
+            const result = await executeHealthStep(step.id);
+            if (learningEnabled) {
+                learnFromStage(learning, step.id, result);
+            }
+
+            if (result.code === 0) {
+                summary.push(`${step.id}: pass`);
+            } else {
+                summary.push(`${step.id}: non-zero exit (${result.code})`);
+            }
+        }
+
+        if (learningEnabled) {
+            saveLearning(learning);
+        }
+
+        await runCommand('git', ['add', '-A'], { cwd: REPO_ROOT });
+        const staged = await runCommand('git', ['diff', '--cached', '--name-only'], { cwd: REPO_ROOT });
+
+        if (!staged.stdout.trim()) {
+            log('[health] No repository-wide fixes were needed.');
+            state.lastRepoHealthFixAt = Date.now();
+            saveState(state);
+            return;
+        }
+
+        await runCommand('git', ['commit', '-m', 'Automated repository health remediation'], { cwd: REPO_ROOT });
+        await runCommand('git', ['push', '--set-upstream', 'origin', branchName, '--force-with-lease'], { cwd: REPO_ROOT });
+
+        const prNumber = await upsertHealthPr(repositorySlug, branchName, summary);
+        pushedPrNumber = prNumber;
+
+        await waitForChecksToBeQueued(repositorySlug, prNumber);
+        await runCommand('gh', ['pr', 'checks', String(prNumber), '--repo', repositorySlug, '--watch', '--interval', '20']);
+        await assertAllChecksPassed(repositorySlug, prNumber);
+
+        log(`[health] Repo health PR #${prNumber} — all workflow checks passed.`);
+
+        state.lastRepoHealthFixAt = Date.now();
+        saveState(state);
+    } finally {
+        await runCommand('git', ['checkout', 'main'], { cwd: REPO_ROOT, allowFailure: true });
+        if (stashed) {
+            await popStash();
+        }
+    }
+
+    if (pushedPrNumber) {
+        const failedChecks = await listPrFailedChecks(repositorySlug, pushedPrNumber);
+        if (learningEnabled && failedChecks.length) {
+            learnFromFailedChecks(learning, failedChecks);
+            saveLearning(learning);
+        }
+    }
+
+    if (!(policy && policy.maintenance && policy.maintenance.cleanupMergedBranches === false)) {
+        const removedBranches = await cleanupMergedBranches(repositorySlug);
+        if (removedBranches.length) {
+            log(`[health] Removed ${removedBranches.length} merged branch(es).`);
+        }
+    }
+
+    if (!(policy && policy.maintenance && policy.maintenance.reportOpenPrFailures === false)) {
+        const reported = await reportOpenPrFailures(repositorySlug);
+        if (reported) {
+            log(`[health] Reported failing workflow checks on ${reported} open PR(s).`);
+        }
+    }
+}
+
 async function main() {
     const state = loadState();
+    const policy = resolvePolicy();
 
-    if (isDue(state.lastDailyAuditAt, ONE_DAY_MS)) {
+    log(`Loaded automation policy profile: ${policy.profile}`);
+
+    if (!policy.dailyAudit) {
+        log('Daily security scan disabled by policy.');
+    } else if (isDue(state.lastDailyAuditAt, ONE_DAY_MS)) {
         await runDailyAudit(state);
     } else {
         log('Daily security scan is not due yet.');
     }
 
-    if (isDue(state.lastWeeklyPushAt, ONE_WEEK_MS)) {
-        await runWeeklyUpdate(state);
+    if (!policy.repoHealth) {
+        log('Repo health resolution disabled by policy.');
+    } else if (isDue(state.lastRepoHealthFixAt, ONE_DAY_MS)) {
+        await runRepoHealthResolution(state, policy);
+    } else {
+        log('Repo health resolution is not due yet.');
+    }
+
+    if (!policy.weeklyUpdate) {
+        log('Weekly PR push disabled by policy.');
+    } else if (isDue(state.lastWeeklyPushAt, ONE_WEEK_MS)) {
+        await runWeeklyUpdate(state, policy);
     } else {
         log('Weekly PR push is not due yet.');
     }
