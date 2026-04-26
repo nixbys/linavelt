@@ -2,17 +2,18 @@
  * MCP Maintenance Scheduler
  *
  * Responsibilities:
- *  - Health check  : every 5 minutes  — GET  /health
- *  - Security audit: every 7 days     — POST /run-audit
- *  - Dependency update: every 30 days — POST /update-repo
+ *  - Health check      : every 5 minutes  — GET /health
+ *  - Security pipeline : every 24 hours   — local automation script
+ *  - Weekly push/PR    : handled by security-automation.js once every 7 days
  *
- * All schedule state is persisted in scheduler-state.json so intervals
- * survive restarts without triggering unnecessary work.
+ * Schedule state is persisted in scheduler-state.json so intervals survive
+ * restarts without triggering unnecessary work.
  */
 
 const http = require('http');
 const fs   = require('fs');
 const path = require('path');
+const { execFile } = require('child_process');
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -21,12 +22,14 @@ const MCP_HOST    = (process.env.MCP_HOST || 'http://localhost:4000');
 const MCP_API_KEY = process.env.MCP_API_KEY || '';
 const STATE_FILE  = path.join(__dirname, 'scheduler-state.json');
 const LOG_FILE    = path.join(__dirname, 'scheduler.log');
+const SECURITY_AUTOMATION_SCRIPT = path.join(__dirname, 'security-automation.js');
 
 const INTERVALS = {
-    healthCheck:   5 * 60 * 1000,         //  5 minutes
-    audit:         7 * 24 * 60 * 60 * 1000, //  7 days
-    update:       30 * 24 * 60 * 60 * 1000  // 30 days
+    healthCheck: 5 * 60 * 1000,         // 5 minutes
+    security:   24 * 60 * 60 * 1000     // 24 hours
 };
+
+let securityRunInProgress = false;
 
 // ---------------------------------------------------------------------------
 // Utilities
@@ -41,7 +44,7 @@ function loadState() {
     try {
         return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
     } catch {
-        return { lastAudit: 0, lastUpdate: 0 };
+        return { lastSecurityRun: 0 };
     }
 }
 
@@ -80,8 +83,7 @@ function request(method, urlStr) {
     });
 }
 
-const get  = url => request('GET',  url);
-const post = url => request('POST', url);
+const get = url => request('GET', url);
 
 // ---------------------------------------------------------------------------
 // Endpoint tasks
@@ -99,32 +101,25 @@ async function checkHealth() {
     }
 }
 
-async function runAudit() {
-    log('[audit] Starting security audit via /run-audit …');
-    try {
-        const { status, body } = await post(`${MCP_HOST}/run-audit`);
-        if (status === 200) {
-            log(`[audit] Completed — ${body.message}`);
-        } else {
-            log(`[audit] FAILED — HTTP ${status}: ${body.message || JSON.stringify(body)}`);
-        }
-    } catch (err) {
-        log(`[audit] ERROR — ${err.message}`);
-    }
-}
+function runSecurityAutomation() {
+    return new Promise((resolve, reject) => {
+        execFile('node', [SECURITY_AUTOMATION_SCRIPT], { cwd: __dirname, env: process.env }, (error, stdout, stderr) => {
+            if (stdout) {
+                log(`[security] ${stdout.trim()}`);
+            }
 
-async function updateRepo() {
-    log('[update] Checking for repository updates via /update-repo …');
-    try {
-        const { status, body } = await post(`${MCP_HOST}/update-repo`);
-        if (status === 200) {
-            log(`[update] Completed — ${body.message}`);
-        } else {
-            log(`[update] FAILED — HTTP ${status}: ${body.message || JSON.stringify(body)}`);
-        }
-    } catch (err) {
-        log(`[update] ERROR — ${err.message}`);
-    }
+            if (stderr) {
+                log(`[security] stderr: ${stderr.trim()}`);
+            }
+
+            if (error) {
+                reject(new Error(error.message));
+                return;
+            }
+
+            resolve();
+        });
+    });
 }
 
 // ---------------------------------------------------------------------------
@@ -137,17 +132,24 @@ async function tick() {
     // Always run health check
     await checkHealth();
 
-    // Weekly audit
-    if (now - state.lastAudit >= INTERVALS.audit) {
-        await runAudit();
-        state.lastAudit = now;
-        saveState(state);
-    }
+    // Daily security automation (daily audit + weekly push handled internally)
+    if (now - state.lastSecurityRun >= INTERVALS.security) {
+        if (securityRunInProgress) {
+            log('[security] Skip: previous security automation run is still in progress.');
+            return;
+        }
 
-    // Monthly update
-    if (now - state.lastUpdate >= INTERVALS.update) {
-        await updateRepo();
-        state.lastUpdate = now;
+        securityRunInProgress = true;
+        log('[security] Starting daily security automation run …');
+        try {
+            await runSecurityAutomation();
+        } catch (err) {
+            log(`[security] ERROR — ${err.message}`);
+        } finally {
+            securityRunInProgress = false;
+        }
+
+        state.lastSecurityRun = now;
         saveState(state);
     }
 }
@@ -157,8 +159,7 @@ async function tick() {
 // ---------------------------------------------------------------------------
 log('MCP Maintenance Scheduler starting …');
 log(`  Health check  : every ${INTERVALS.healthCheck / 60000} minutes`);
-log(`  Security audit: every ${INTERVALS.audit / 86400000} days`);
-log(`  Repo update   : every ${INTERVALS.update / 86400000} days (monthly)`);
+log(`  Security run  : every ${INTERVALS.security / 86400000} days`);
 
 // Run immediately on startup, then on each health-check interval
 tick();
