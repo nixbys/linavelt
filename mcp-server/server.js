@@ -15,6 +15,7 @@ const HOST = process.env.MCP_HOST_BIND || '127.0.0.1';
 const LOG_FILE = path.join(__dirname, 'server.log');
 const API_KEY = process.env.MCP_API_KEY;
 const PERIODIC_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+const ENABLE_PERIODIC_MAINTENANCE = process.env.MCP_ENABLE_PERIODIC_MAINTENANCE === 'true';
 
 // ---------------------------------------------------------------------------
 // Application setup
@@ -122,7 +123,12 @@ async function runPeriodicTasks() {
     }
 }
 
-setInterval(runPeriodicTasks, PERIODIC_INTERVAL_MS);
+if (ENABLE_PERIODIC_MAINTENANCE) {
+    setInterval(runPeriodicTasks, PERIODIC_INTERVAL_MS);
+    logMessage('Legacy periodic maintenance is enabled (hourly).');
+} else {
+    logMessage('Legacy periodic maintenance is disabled; use scheduler.js for daily/weekly security automation.');
+}
 
 // ---------------------------------------------------------------------------
 // Start

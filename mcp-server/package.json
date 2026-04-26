@@ -5,7 +5,19 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:once": "sh ./start-once.sh",
+    "start:daemon": "sh ./start-daemon.sh",
+    "stop": "sh ./stop-daemon.sh",
+    "status": "sh ./status-daemon.sh",
     "scheduler": "node scheduler.js",
+    "scheduler:start": "sh ./start-scheduler-daemon.sh",
+    "scheduler:stop": "sh ./stop-scheduler-daemon.sh",
+    "scheduler:status": "sh ./status-scheduler-daemon.sh",
+    "automation:readiness": "node automation-readiness.js",
+    "security:automation": "node security-automation.js",
+    "automation:start": "sh ./start-automation.sh",
+    "automation:stop": "sh ./stop-automation.sh",
+    "automation:status": "sh ./status-automation.sh",
     "start:all": "node server.js & node scheduler.js"
   },
   "dependencies": {

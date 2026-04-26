@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
@@ -32,11 +34,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Blog Routes
-Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
 // Admin Routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 });
 
 require __DIR__.'/auth.php';

@@ -6,6 +6,8 @@ The MCP (Model Context Protocol) server is designed to keep the repository proje
 - Automatically updates the repository files.
 - Runs security audits and resolves vulnerabilities.
 - Provides a health check endpoint to monitor the server status.
+- Runs daily security scans (npm/composer + GitHub alerts) and writes reports.
+- Creates one weekly combined security commit and PR titled `Weekly Security Update` after checks pass.
 
 ## Endpoints
 
@@ -28,26 +30,88 @@ The MCP (Model Context Protocol) server is designed to keep the repository proje
    npm install
    ```
 
-2. Start the server:
+2. Verify full-automation prerequisites:
    ```bash
-   npm start
+   npm run automation:readiness
    ```
 
-3. Access the server at `http://localhost:3000`.
+3. Start full automation stack in background (server + daily scheduler):
+   ```bash
+   npm run automation:start
+   ```
+
+4. Check full automation status:
+   ```bash
+   npm run automation:status
+   ```
+
+5. Stop full automation stack:
+   ```bash
+   npm run automation:stop
+   ```
+
+6. Access server health at `http://127.0.0.1:4000/health`.
+
+### Individual Process Controls
+
+- Server only:
+  - Start once (foreground): `npm run start:once`
+  - Start daemon: `npm run start:daemon`
+  - Status: `npm run status`
+  - Stop: `npm run stop`
+- Scheduler only:
+  - Start daemon: `npm run scheduler:start`
+  - Status: `npm run scheduler:status`
+  - Stop: `npm run scheduler:stop`
+
+## Security Automation (Daily + Weekly)
+
+The scheduler runs `security-automation.js` daily. That script:
+
+- Performs daily security auditing of:
+  - `npm audit` in repository root
+  - `npm audit` in `mcp-server/`
+  - `composer audit`
+  - Open Dependabot alerts in the linked GitHub repo
+  - Open code scanning alerts in the linked GitHub repo
+- Writes daily reports to `mcp-server/security-reports/YYYY-MM-DD.json`
+- Once per week, creates a single combined update branch and one commit titled `Weekly Security Update`
+- Pushes exactly one weekly update branch and opens/updates a PR with the same title
+- Waits for PR checks to pass via GitHub CLI
+- Requires a clean git working tree for weekly commit/push safety
+- Uses scheduler run-locking to prevent overlapping daily automation runs
+
+### Required Environment
+
+- `MCP_API_KEY`: API key for protected MCP endpoints
+- `GITHUB_REPOSITORY`: GitHub repository in `owner/repo` format (optional if `gh` is already linked)
+- GitHub CLI authentication (`gh auth login`) with permissions for:
+  - Pull requests
+  - Actions/checks read
+  - Dependabot alerts read
+  - Code scanning alerts read
+
+### Manual Run
+
+You can run the same process on demand:
+
+```bash
+npm run security:automation
+```
 
 ## Example Usage
 
 - To update the repository:
   ```bash
-  curl -X POST http://localhost:3000/update-repo
+  curl -X POST http://127.0.0.1:4000/update-repo
   ```
 
 - To run a security audit:
   ```bash
-  curl -X POST http://localhost:3000/run-audit
+  curl -X POST http://127.0.0.1:4000/run-audit
   ```
 
 - To check server health:
   ```bash
-  curl http://localhost:3000/health
+  curl http://127.0.0.1:4000/health
   ```
