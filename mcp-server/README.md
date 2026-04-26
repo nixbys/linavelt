@@ -81,6 +81,21 @@ The scheduler runs `security-automation.js` daily. That script:
 - Requires a clean git working tree for weekly commit/push safety
 - Uses scheduler run-locking to prevent overlapping daily automation runs
 
+### Policy Profiles and Runbook
+
+Security automation behavior is profile-driven using `mcp-server/automation-policy.json`.
+Set the active profile with:
+
+```bash
+AUTOMATION_POLICY_PROFILE=default node security-automation.js
+```
+
+Available profiles currently include `default`, `ci`, `maintenance-light`, and `production-strict`.
+
+For full operations guidance, recovery procedures, and validation checklists, see:
+
+- `docs/SECURITY_AUTOMATION_RUNBOOK.md`
+
 ### Required Environment
 
 - `MCP_API_KEY`: API key for protected MCP endpoints
