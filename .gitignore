@@ -25,7 +25,11 @@ mcp-server/.mcp-server.pid
 mcp-server/.mcp-scheduler.pid
 mcp-server/security-automation-state.json
 mcp-server/security-automation.log
+mcp-server/automation-learning.json
 mcp-server/security-reports/
+output.json
+final_output.json
+results.txt
 /.nova
 /.vscode
 /.zed

@@ -1,0 +1,33 @@
+# Secrets — never bake these into images
+.env
+.env.*
+!.env.example
+storage/oauth-private.key
+storage/oauth-public.key
+
+# Local dev tools
+node_modules/
+npm-debug.log*
+
+# Runtime-generated, writable at container start
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/logs/
+bootstrap/cache/
+
+# Electron desktop artifacts
+electron/
+docs/
+results.txt
+output.json
+final_output.json
+mcp-server-config.json
+test-server.js
+extract-runner.sh
+
+# CI / VCS
+.git/
+.github/
+.gitignore
+.gitattributes
