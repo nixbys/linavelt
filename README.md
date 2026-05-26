@@ -148,6 +148,8 @@ npm run security:audit
 
 Preflight runs the full local quality gate in one command and reports warnings for environment-only blockers (for example, missing PHP/composer or missing GitHub CLI authentication).
 
+For Laravel test execution, preflight requires PHP `pdo` plus at least one driver (`pdo_sqlite` or `pdo_mysql`). If those modules are unavailable in the current runtime, preflight will skip tests with a warning instead of failing the entire run.
+
 ## Key Project Paths
 
 - app/: Laravel application code (controllers, jobs, Livewire, providers)

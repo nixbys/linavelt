@@ -138,11 +138,11 @@ return [
             ],
             'Vue + Inertia' => [
                 ['path' => 'resources/js/Pages/Home.vue', 'stub' => "<template>\n  <div>\n    <h1>Home</h1>\n  </div>\n</template>\n"],
-                ['path' => 'resources/js/app.js',         'stub' => "import './bootstrap';\nimport { createApp, h } from 'vue';\nimport { createInertiaApp } from '@inertiajs/vue3';\ncreateInertiaApp({ resolve: name => require(`./Pages/${name}`), setup({ el, App, props, plugin }) { createApp({ render: () => h(App, props) }).use(plugin).mount(el); } });\n"],
+                ['path' => 'resources/js/app.js',         'stub' => "import './bootstrap';\nimport { createApp, h } from 'vue';\nimport { createInertiaApp } from '@inertiajs/vue3';\ncreateInertiaApp({ resolve: name => require(`./Pages/\${name}`), setup({ el, App, props, plugin }) { createApp({ render: () => h(App, props) }).use(plugin).mount(el); } });\n"],
             ],
             'React + Inertia' => [
                 ['path' => 'resources/js/Pages/Home.jsx', 'stub' => "export default function Home() {\n  return <h1>Home</h1>;\n}\n"],
-                ['path' => 'resources/js/app.jsx',        'stub' => "import { createInertiaApp } from '@inertiajs/react';\nimport { createRoot } from 'react-dom/client';\ncreateInertiaApp({ resolve: name => require(`./Pages/${name}`), setup({ el, App, props }) { createRoot(el).render(<App {...props} />); } });\n"],
+                ['path' => 'resources/js/app.jsx',        'stub' => "import { createInertiaApp } from '@inertiajs/react';\nimport { createRoot } from 'react-dom/client';\ncreateInertiaApp({ resolve: name => require(`./Pages/\${name}`), setup({ el, App, props }) { createRoot(el).render(<App {...props} />); } });\n"],
             ],
             'Blade + Alpine' => [
                 ['path' => 'resources/views/pages/home.blade.php', 'stub' => "<x-layouts.app>\n  <div x-data=\"{ open: false }\">\n    <h1 class=\"text-2xl font-bold\">Home</h1>\n  </div>\n</x-layouts.app>\n"],
