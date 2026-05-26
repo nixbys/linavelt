@@ -5,6 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
+        "check:preflight": "sh ./scripts/preflight-check.sh",
+        "security:audit": "npm audit --omit=dev && cd mcp-server && npm audit --omit=dev",
         "electron:start": "electron .",
         "electron:pack": "electron-builder --dir",
         "electron:build": "npm run build && electron-builder"

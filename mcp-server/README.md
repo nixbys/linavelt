@@ -25,6 +25,8 @@ The MCP (Model Context Protocol) server is designed to keep the repository proje
 
 ## Setup
 
+Use `sh ./<script>.sh` when invoking local daemon scripts directly. This is reliable even when execute bits are not set in a given environment.
+
 1. Install dependencies:
    ```bash
    npm install
@@ -51,6 +53,11 @@ The MCP (Model Context Protocol) server is designed to keep the repository proje
    ```
 
 6. Access server health at `http://127.0.0.1:4000/health`.
+
+7. From the repository root, run a combined quality/security preflight:
+  ```bash
+  npm run check:preflight
+  ```
 
 ### Individual Process Controls
 
@@ -105,6 +112,8 @@ For full operations guidance, recovery procedures, and validation checklists, se
   - Actions/checks read
   - Dependabot alerts read
   - Code scanning alerts read
+
+Without Composer, PHP, or authenticated GitHub CLI access, readiness checks will report failures or warnings for those capabilities.
 
 ### Manual Run
 
