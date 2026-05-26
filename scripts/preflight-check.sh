@@ -41,6 +41,11 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+php_has_module() {
+    module="$1"
+    php -m 2>/dev/null | tr '[:upper:]' '[:lower:]' | grep -q "^${module}$"
+}
+
 print_section "Environment"
 run_required "Node is available" command_exists node
 run_required "npm is available" command_exists npm
@@ -54,7 +59,12 @@ fi
 
 if command_exists php; then
     if [ -f "$ROOT_DIR/artisan" ]; then
-        run_required "Laravel tests pass" sh -c "cd '$ROOT_DIR' && php artisan test"
+        if php_has_module pdo && (php_has_module pdo_sqlite || php_has_module pdo_mysql); then
+            run_required "Laravel tests pass" sh -c "cd '$ROOT_DIR' && php artisan test"
+        else
+            printf "[WARN] PHP PDO extension (pdo + driver) is missing; Laravel tests skipped.\n"
+            warn_count=$((warn_count + 1))
+        fi
     fi
 
     if [ -x "$ROOT_DIR/vendor/bin/pint" ]; then

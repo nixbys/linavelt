@@ -59,6 +59,8 @@ Use `sh ./<script>.sh` when invoking local daemon scripts directly. This is reli
   npm run check:preflight
   ```
 
+Preflight executes Laravel tests only when PHP has `pdo` and at least one PDO driver (`pdo_sqlite` or `pdo_mysql`) available in the active runtime.
+
 ### Individual Process Controls
 
 - Server only:
