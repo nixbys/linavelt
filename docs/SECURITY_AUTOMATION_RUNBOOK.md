@@ -5,6 +5,7 @@ This runbook describes the full security and repository health automation flow i
 ## Location
 
 - Script: mcp-server/security-automation.js
+- Observability summary: mcp-server/automation-observability.js
 - State: mcp-server/security-automation-state.json
 - Learning state: mcp-server/automation-learning.json
 - Policy profiles: mcp-server/automation-policy.json
@@ -17,7 +18,7 @@ This runbook describes the full security and repository health automation flow i
 - Runs npm audit in repository root.
 - Runs npm audit in mcp-server.
 - Runs composer audit.
-- Queries GitHub Dependabot and code scanning alerts (if gh is available).
+- Queries GitHub Dependabot and code scanning alerts (if gh is available), including the CodeQL and OSSAR workflows defined in `.github/workflows/codeql-analysis.yml` and `.github/workflows/ossar.yml`.
 - Writes a dated report JSON in security-reports.
 
 2. Repo health phase (daily)
@@ -109,6 +110,10 @@ Run automation now:
 
 node mcp-server/security-automation.js
 
+Print the latest observability summary:
+
+npm run -C mcp-server automation:report
+
 Force all phases to run on next execution:
 
 node -e "const fs=require('fs');fs.writeFileSync('mcp-server/security-automation-state.json', JSON.stringify({lastDailyAuditAt:0,lastWeeklyPushAt:0,lastRepoHealthFixAt:0},null,2));"
@@ -124,6 +129,7 @@ AUTOMATION_POLICY_PROFILE=production-strict node mcp-server/security-automation.
 ## Validation Checklist
 
 - Script syntax passes: node --check mcp-server/security-automation.js
+- Observability summary command returns the latest report state: npm run -C mcp-server automation:report
 - Policy file is valid JSON.
 - security-reports contains a fresh dated report.
 - Repo health and weekly PR checks reach passing state.
