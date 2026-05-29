@@ -144,6 +144,7 @@ php artisan test
 ./vendor/bin/pint
 npm run build
 npm run security:audit
+npm run release:smoke
 ```
 
 Preflight runs the full local quality gate in one command and reports warnings for environment-only blockers (for example, missing PHP/composer or missing GitHub CLI authentication).
@@ -178,6 +179,7 @@ This starts:
 - docs/SECURITY_AUTOMATION_RUNBOOK.md
 - docs/container-security.md
 - docs/ELECTRON_INTEGRATION.md
+- docs/ROADMAP_EXECUTION_PLAN.md
 - mcp-server/README.md
 
 ## Roadmap Direction
@@ -186,6 +188,18 @@ This starts:
 - Deepen builder integrations for page and content authoring.
 - Increase automation observability (alerts, dashboards, and run intelligence).
 - Tighten release workflows for web and Electron distribution.
+
+## Roadmap Execution
+
+Roadmap initiatives are tracked and sequenced in:
+
+- docs/ROADMAP_EXECUTION_PLAN.md
+
+Initial execution already in-repo:
+
+- Automation observability summary command: `cd mcp-server && npm run automation:report`
+- PR release-readiness workflow: `.github/workflows/release-readiness.yml`
+- Electron release smoke command: `npm run release:smoke`
 
 ## Contributing
 
