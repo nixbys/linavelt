@@ -1,6 +1,29 @@
 <?php
 
 use Illuminate\Support\Str;
+use Pdo\Mysql;
+
+$mysqlOptions = static function (): array {
+    if (! extension_loaded('pdo_mysql')) {
+        return [];
+    }
+
+    $sslCa = env('MYSQL_ATTR_SSL_CA');
+
+    if ($sslCa === null || $sslCa === '') {
+        return [];
+    }
+
+    if (defined('Pdo\\Mysql::ATTR_SSL_CA')) {
+        return [Mysql::ATTR_SSL_CA => $sslCa];
+    }
+
+    if (defined('PDO::MYSQL_ATTR_SSL_CA')) {
+        return [PDO::MYSQL_ATTR_SSL_CA => $sslCa];
+    }
+
+    return [];
+};
 
 return [
 
@@ -57,9 +80,7 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => $mysqlOptions(),
         ],
 
         'mariadb' => [
@@ -77,9 +98,7 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => $mysqlOptions(),
         ],
 
         'pgsql' => [
