@@ -218,6 +218,13 @@ Roadmap initiatives are tracked and sequenced in:
 
 - docs/ROADMAP_EXECUTION_PLAN.md
 
+Recommended initiation order:
+
+1. Lock release workflow and always-on deployment first so new work can be shipped and hosted continuously.
+2. Keep automation observability current so daily and weekly repo health is visible without log scraping.
+3. Continue module generation and admin controls once delivery and hosting are stable.
+4. Finish builder integrations after the scaffolding and operations path are stable.
+
 Initial execution already in-repo:
 
 - Automation observability summary command: `cd mcp-server && npm run automation:report`
