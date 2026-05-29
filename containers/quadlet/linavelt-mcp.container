@@ -1,0 +1,18 @@
+[Unit]
+Description=Linavelt MCP server container
+After=linavelt-pod.service
+Requires=linavelt-pod.service
+
+[Container]
+ContainerName=linavelt-mcp
+Pod=linavelt.pod
+Image=localhost/linavelt-mcp:latest
+Environment=MCP_HOST_BIND=0.0.0.0
+Environment=MCP_PORT=4000
+Environment=MCP_API_KEY=dev-local-key
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

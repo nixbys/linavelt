@@ -19,13 +19,14 @@ RUN dnf -y update && dnf -y install \
     unzip \
     && dnf clean all
 
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Install Composer (explicit registry avoids short-name resolution prompts)
+COPY --from=docker.io/library/composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
 # Copy dependency manifests first for layer caching
 COPY composer.json composer.lock ./
+COPY auth.json ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
 COPY package.json package-lock.json* ./
@@ -35,7 +36,14 @@ RUN npm ci --ignore-scripts
 COPY . .
 
 # Remove secrets before they reach the runtime stage
-RUN rm -f .env storage/oauth-private.key storage/oauth-public.key
+RUN rm -f .env auth.json storage/oauth-private.key storage/oauth-public.key
+
+# Ensure required Laravel runtime directories exist in container build context
+RUN mkdir -p bootstrap/cache \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs
 
 # Finish composer autoloader and npm build
 RUN composer dump-autoload --optimize

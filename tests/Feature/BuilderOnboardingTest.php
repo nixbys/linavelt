@@ -20,7 +20,8 @@ class BuilderOnboardingTest extends TestCase
 
     public function test_authenticated_users_can_view_onboarding_page(): void
     {
-        $user = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->createOne();
 
         $response = $this->actingAs($user)->get(route('builder.onboarding'));
 
@@ -31,7 +32,8 @@ class BuilderOnboardingTest extends TestCase
     {
         Queue::fake();
 
-        $user = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->createOne();
 
         $preferences = [];
 
@@ -65,7 +67,8 @@ class BuilderOnboardingTest extends TestCase
 
     public function test_onboarding_rejects_invalid_preference_values(): void
     {
-        $user = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->createOne();
 
         $response = $this->actingAs($user)->from(route('builder.onboarding'))->post(route('builder.onboarding.update'), [
             'preferences' => [
