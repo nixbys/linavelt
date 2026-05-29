@@ -17,7 +17,8 @@ class ModuleGenerationTest extends TestCase
     {
         Queue::fake();
 
-        $user = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->createOne();
         $preferences = $this->validPreferences();
 
         $this->actingAs($user)->post(route('builder.onboarding.update'), [
@@ -33,7 +34,8 @@ class ModuleGenerationTest extends TestCase
     {
         Queue::fake();
 
-        $user = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->createOne();
 
         $this->actingAs($user)->post(route('builder.onboarding.update'), [
             'preferences' => $this->validPreferences(),
@@ -50,7 +52,8 @@ class ModuleGenerationTest extends TestCase
     {
         Storage::fake();
 
-        $user = User::factory()->create([
+        /** @var User $user */
+        $user = User::factory()->createOne([
             'onboarding_preferences' => $this->validPreferences(),
         ]);
 
@@ -69,7 +72,8 @@ class ModuleGenerationTest extends TestCase
     {
         Storage::fake();
 
-        $user = User::factory()->create([
+        /** @var User $user */
+        $user = User::factory()->createOne([
             'onboarding_preferences' => [
                 'frontend_layer' => 'Livewire + Flux',
                 'backend_layer' => 'Laravel Monolith',
@@ -89,7 +93,8 @@ class ModuleGenerationTest extends TestCase
         // created to simulate a mid-run failure path via failed() callback.
         Storage::fake();
 
-        $user = User::factory()->create([
+        /** @var User $user */
+        $user = User::factory()->createOne([
             'onboarding_preferences' => $this->validPreferences(),
         ]);
 
@@ -97,7 +102,8 @@ class ModuleGenerationTest extends TestCase
 
         // Delete the user to trigger early return (non-failure path), so instead
         // test the failed() method directly with a live user.
-        $user2 = User::factory()->create([
+        /** @var User $user2 */
+        $user2 = User::factory()->createOne([
             'module_generation_status' => 'running',
         ]);
 
@@ -111,7 +117,8 @@ class ModuleGenerationTest extends TestCase
 
     public function test_generation_status_visible_on_onboarding_page(): void
     {
-        $user = User::factory()->create([
+        /** @var User $user */
+        $user = User::factory()->createOne([
             'onboarding_preferences' => $this->validPreferences(),
             'onboarding_completed_at' => now(),
             'module_generation_status' => 'complete',
@@ -128,7 +135,8 @@ class ModuleGenerationTest extends TestCase
 
     public function test_generation_status_visible_on_dashboard(): void
     {
-        $user = User::factory()->create([
+        /** @var User $user */
+        $user = User::factory()->createOne([
             'onboarding_preferences' => $this->validPreferences(),
             'onboarding_completed_at' => now(),
             'module_generation_status' => 'running',
@@ -144,7 +152,8 @@ class ModuleGenerationTest extends TestCase
 
     public function test_generation_status_not_shown_before_first_save(): void
     {
-        $user = User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->createOne();
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
@@ -158,7 +167,8 @@ class ModuleGenerationTest extends TestCase
         Storage::fake();
 
         $preferences = $this->validPreferences();
-        $user = User::factory()->create([
+        /** @var User $user */
+        $user = User::factory()->createOne([
             'onboarding_preferences' => $preferences,
         ]);
 

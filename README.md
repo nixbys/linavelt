@@ -150,6 +150,20 @@ Preflight runs the full local quality gate in one command and reports warnings f
 
 For Laravel test execution, preflight requires PHP `pdo` plus at least one driver (`pdo_sqlite` or `pdo_mysql`). If those modules are unavailable in the current runtime, preflight will skip tests with a warning instead of failing the entire run.
 
+## Podman Pod Workflow
+
+Use the one-command pod bootstrap to build images, start the pod, run migrations, and verify health:
+
+```bash
+APP_KEY="$(openssl rand -base64 32 | sed 's#^#base64:#')" MCP_API_KEY="dev-local-key" sh ./containers/quadlet/up.sh
+```
+
+This starts:
+
+- Laravel app on `http://127.0.0.1:8000`
+- MCP server on `http://127.0.0.1:4000/health`
+- MariaDB on `127.0.0.1:3306`
+
 ## Key Project Paths
 
 - app/: Laravel application code (controllers, jobs, Livewire, providers)

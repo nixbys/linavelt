@@ -108,7 +108,7 @@ For full operations guidance, recovery procedures, and validation checklists, se
 ### Required Environment
 
 - `MCP_API_KEY`: API key for protected MCP endpoints
-- `GITHUB_REPOSITORY`: GitHub repository in `owner/repo` format (optional if `gh` is already linked)
+- `GITHUB_REPOSITORY`: GitHub repository in `owner/repo` format (optional; readiness can also infer from `git remote origin`)
 - GitHub CLI authentication (`gh auth login`) with permissions for:
   - Pull requests
   - Actions/checks read
