@@ -1,0 +1,13 @@
+[Unit]
+Description=Linavelt production pod
+After=network-online.target
+Wants=network-online.target
+
+[Pod]
+PodName=linavelt
+PublishPort=8000:8000
+PublishPort=4000:4000
+PublishPort=3306:3306
+
+[Install]
+WantedBy=default.target

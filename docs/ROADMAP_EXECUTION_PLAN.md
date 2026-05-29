@@ -69,23 +69,28 @@ This plan turns the roadmap direction into executable, measurable workstreams.
 
 1. Add release-readiness workflow for PR validation.
 2. Validate web asset build and Electron release prerequisites in CI.
+3. Publish app and MCP images to GHCR for remote always-on deployment.
+4. Provide quadlet templates for a remote host to run the published images 24/7.
 
 ### Execution Workflow
 
 1. Enforce web build readiness on PRs.
 2. Run Electron packaging smoke validation in CI.
 3. Track release-readiness failures as blocking quality signals.
+4. Push GHCR images on main and tags, then restart remote quadlet units from the published images.
 
 ### Exit Criteria
 
 1. PRs run release-readiness workflow automatically.
 2. Web build and Electron readiness checks pass before merge.
 3. Failing readiness checks are visible and actionable.
+4. Remote hosts can consume GHCR images without depending on a local developer session.
 
 ## Execution Status (Initial)
 
 - [x] Workstream 3 initiated with `automation:report` command.
 - [x] Workstream 4 initiated with `release-readiness` workflow and Electron smoke checks.
+- [x] Workstream 4 extended with GHCR publishing and remote quadlet deployment package.
 - [ ] Workstream 1 implementation pending schema and admin-control milestones.
 - [ ] Workstream 2 implementation pending contract and persistence milestones.
 

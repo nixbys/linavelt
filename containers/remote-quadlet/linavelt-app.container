@@ -1,0 +1,27 @@
+[Unit]
+Description=Linavelt Laravel application container for production
+After=linavelt-db.service
+Requires=linavelt-pod.service
+Wants=linavelt-db.service
+
+[Container]
+ContainerName=linavelt-app
+Pod=linavelt.pod
+Image=ghcr.io/__GHCR_OWNER__/linavelt-app:__IMAGE_TAG__
+Environment=APP_ENV=production
+Environment=APP_DEBUG=false
+Environment=APP_URL=__APP_URL__
+Environment=APP_KEY=__APP_KEY__
+Environment=DB_CONNECTION=mysql
+Environment=DB_HOST=127.0.0.1
+Environment=DB_PORT=3306
+Environment=DB_DATABASE=laravel
+Environment=DB_USERNAME=laravel
+Environment=DB_PASSWORD=__MYSQL_PASSWORD__
+Environment=QUEUE_CONNECTION=database
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

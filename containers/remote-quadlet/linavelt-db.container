@@ -1,0 +1,20 @@
+[Unit]
+Description=Linavelt MariaDB container for production
+After=linavelt-pod.service
+Requires=linavelt-pod.service
+
+[Container]
+ContainerName=linavelt-db
+Pod=linavelt.pod
+Image=docker.io/library/mariadb:10.11
+Environment=MYSQL_ROOT_PASSWORD=__MYSQL_ROOT_PASSWORD__
+Environment=MYSQL_DATABASE=laravel
+Environment=MYSQL_USER=laravel
+Environment=MYSQL_PASSWORD=__MYSQL_PASSWORD__
+Volume=linavelt-db-data:/var/lib/mysql:Z
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
