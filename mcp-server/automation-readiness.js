@@ -36,6 +36,24 @@ function warn(message) {
     console.log(`[WARN] ${message}`);
 }
 
+function parseGitHubRepo(remoteUrl) {
+    if (!remoteUrl) {
+        return '';
+    }
+
+    const httpsMatch = remoteUrl.match(/^https:\/\/github\.com\/([^/]+)\/([^/.]+)(?:\.git)?$/i);
+    if (httpsMatch) {
+        return `${httpsMatch[1]}/${httpsMatch[2]}`;
+    }
+
+    const sshMatch = remoteUrl.match(/^git@github\.com:([^/]+)\/([^/.]+)(?:\.git)?$/i);
+    if (sshMatch) {
+        return `${sshMatch[1]}/${sshMatch[2]}`;
+    }
+
+    return '';
+}
+
 async function main() {
     let failed = false;
 
@@ -60,6 +78,12 @@ async function main() {
         const repoView = await run('gh', ['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner'], { cwd: REPO_ROOT });
         if (repoView.ok && repoView.stdout) {
             repo = repoView.stdout;
+        }
+    }
+    if (!repo) {
+        const remoteUrl = await run('git', ['config', '--get', 'remote.origin.url'], { cwd: REPO_ROOT });
+        if (remoteUrl.ok && remoteUrl.stdout) {
+            repo = parseGitHubRepo(remoteUrl.stdout);
         }
     }
 
