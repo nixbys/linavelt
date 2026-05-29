@@ -14,6 +14,7 @@
         "scheduler:stop": "sh ./stop-scheduler-daemon.sh",
         "scheduler:status": "sh ./status-scheduler-daemon.sh",
         "automation:readiness": "node automation-readiness.js",
+        "automation:report": "node automation-observability.js",
         "security:automation": "node security-automation.js",
         "automation:start": "sh ./start-automation.sh",
         "automation:stop": "sh ./stop-automation.sh",

@@ -47,14 +47,19 @@ Use `sh ./<script>.sh` when invoking local daemon scripts directly. This is reli
    npm run automation:status
    ```
 
-5. Stop full automation stack:
+5. Print consolidated automation observability summary:
+  ```bash
+  npm run automation:report
+  ```
+
+6. Stop full automation stack:
    ```bash
    npm run automation:stop
    ```
 
-6. Access server health at `http://127.0.0.1:4000/health`.
+7. Access server health at `http://127.0.0.1:4000/health`.
 
-7. From the repository root, run a combined quality/security preflight:
+8. From the repository root, run a combined quality/security preflight:
   ```bash
   npm run check:preflight
   ```
@@ -104,6 +109,7 @@ Available profiles currently include `default`, `ci`, `maintenance-light`, and `
 For full operations guidance, recovery procedures, and validation checklists, see:
 
 - `docs/SECURITY_AUTOMATION_RUNBOOK.md`
+- `docs/ROADMAP_EXECUTION_PLAN.md`
 
 ### Required Environment
 
