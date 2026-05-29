@@ -165,6 +165,29 @@ This starts:
 - MCP server on `http://127.0.0.1:4000/health`
 - MariaDB on `127.0.0.1:3306`
 
+## Always-On Remote Deployment
+
+If you want Linavelt and the MCP server to run 24/7 without depending on your local machine, use the remote GHCR + quadlet deployment package:
+
+1. Push to `main` so GitHub Actions publishes images to GitHub Container Registry.
+2. On your always-on Linux host, install the remote quadlet units from `containers/remote-quadlet/`.
+3. Restart the host units whenever a new image tag is published.
+
+The deployment package lives in:
+
+- `containers/remote-quadlet/README.md`
+
+Relevant automation:
+
+- `.github/workflows/publish-containers.yml`
+
+Operational commands:
+
+```bash
+npm run release:smoke
+cd mcp-server && npm run automation:report
+```
+
 ## Key Project Paths
 
 - app/: Laravel application code (controllers, jobs, Livewire, providers)
