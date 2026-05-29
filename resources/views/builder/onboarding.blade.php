@@ -7,6 +7,7 @@
         $onboardingCompletedAt = $onboardingCompletedAt ?? null;
         $moduleGenerationStatus = $moduleGenerationStatus ?? null;
         $moduleGenerationCompletedAt = $moduleGenerationCompletedAt ?? null;
+        $latestRevision = $latestRevision ?? null;
 
         $summaryItems = [];
 
@@ -164,6 +165,33 @@
                     @else
                         <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
                             Generation will be queued when you save your preferences.
+                        </p>
+                    @endif
+                </article>
+
+                <article class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
+                    <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Revision Flow</h3>
+                    @if ($latestRevision)
+                        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+                            Latest revision is <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ ucfirst($latestRevision->status) }}</span>.
+                        </p>
+                        <div class="mt-4 flex flex-col gap-3">
+                            <form method="POST" action="{{ route('builder.onboarding.revisions.publish') }}">
+                                @csrf
+                                <button type="submit" class="w-full rounded-xl border border-emerald-300/60 bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400">
+                                    Publish latest revision
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ route('builder.onboarding.revisions.rollback') }}">
+                                @csrf
+                                <button type="submit" class="w-full rounded-xl border border-rose-300/60 bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-400">
+                                    Roll back latest published revision
+                                </button>
+                            </form>
+                        </div>
+                    @else
+                        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+                            Save preferences first to create a revision snapshot that can be published or rolled back.
                         </p>
                     @endif
                 </article>
