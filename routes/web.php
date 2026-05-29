@@ -23,6 +23,14 @@ Route::post('builder/onboarding', [BuilderOnboardingController::class, 'update']
     ->middleware(['auth', 'verified'])
     ->name('builder.onboarding.update');
 
+Route::post('builder/onboarding/revisions/publish', [BuilderOnboardingController::class, 'publishRevision'])
+    ->middleware(['auth', 'verified'])
+    ->name('builder.onboarding.revisions.publish');
+
+Route::post('builder/onboarding/revisions/rollback', [BuilderOnboardingController::class, 'rollbackRevision'])
+    ->middleware(['auth', 'verified'])
+    ->name('builder.onboarding.revisions.rollback');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -48,6 +56,8 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 // Admin Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::post('/admin/users/{user}/module-generation/retry', [AdminController::class, 'retryModuleGeneration'])
+        ->name('admin.module-generation.retry');
 });
 
 require __DIR__.'/auth.php';

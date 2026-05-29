@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\GenerateProjectModules;
+use App\Models\BuilderRevision;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -62,7 +64,50 @@ class BuilderOnboardingTest extends TestCase
             ->assertSeeText('Saved Stack Profile')
             ->assertSeeText('Last saved')
             ->assertSeeText('Profile completion')
-            ->assertSeeText($preferences['frontend_layer']);
+            ->assertSeeText($preferences['frontend_layer'])
+            ->assertSeeText('Revision Flow');
+    }
+
+    public function test_authenticated_users_can_publish_and_rollback_builder_revisions(): void
+    {
+        Queue::fake();
+
+        /** @var User $user */
+        $user = User::factory()->create([
+            'onboarding_preferences' => [
+                'frontend_layer' => 'Livewire + Flux',
+                'backend_layer' => 'Laravel Monolith',
+                'data_integrations' => 'MySQL + Queues',
+            ],
+            'module_generation_status' => 'complete',
+        ]);
+
+        BuilderRevision::create([
+            'user_id' => $user->id,
+            'status' => 'draft',
+            'payload' => $user->onboarding_preferences,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('builder.onboarding.revisions.publish'))
+            ->assertRedirect();
+
+        $revision = BuilderRevision::query()->where('user_id', $user->id)->latest()->first();
+
+        $this->assertSame('published', $revision?->status);
+        $this->assertNotNull($revision?->published_at);
+
+        $this->actingAs($user)
+            ->post(route('builder.onboarding.revisions.rollback'))
+            ->assertRedirect();
+
+        $revision->refresh();
+        $user->refresh();
+
+        $this->assertSame('rolled_back', $revision->status);
+        $this->assertNotNull($revision->rolled_back_at);
+        $this->assertSame('pending', $user->module_generation_status);
+        Queue::assertPushed(GenerateProjectModules::class);
     }
 
     public function test_onboarding_rejects_invalid_preference_values(): void
