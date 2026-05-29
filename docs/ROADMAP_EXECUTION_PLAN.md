@@ -2,6 +2,13 @@
 
 This plan turns the roadmap direction into executable, measurable workstreams.
 
+## Recommended Execution Order
+
+1. Release workflow tightening: establish PR gating, publish images, and support always-on remote deployment.
+2. Automation observability: keep repo health visible and actionable.
+3. Module generation and admin controls: expand the product surface once release and observability are stable.
+4. Builder integrations: add authoring and persistence flows after the platform workflow is steady.
+
 ## Workstream 1: Module Generation and Admin Controls
 
 ### Initiation Steps
