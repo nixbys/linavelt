@@ -6,7 +6,7 @@ The MCP (Model Context Protocol) server is designed to keep the repository proje
 - Automatically updates the repository files.
 - Runs security audits and resolves vulnerabilities.
 - Provides a health check endpoint to monitor the server status.
-- Runs daily security scans (npm/composer + GitHub alerts) and writes reports.
+- Runs daily security scans (npm/composer + GitHub alerts) and writes reports that feed `npm run automation:report`.
 - Creates one weekly combined security commit and PR titled `Weekly Security Update` after checks pass.
 
 ## Endpoints
@@ -87,13 +87,14 @@ The scheduler runs `security-automation.js` daily. That script:
   - `npm audit` in `mcp-server/`
   - `composer audit`
   - Open Dependabot alerts in the linked GitHub repo
-  - Open code scanning alerts in the linked GitHub repo
+  - Open code scanning alerts in the linked GitHub repo, including the repository CodeQL and OSSAR workflows in `.github/workflows/codeql-analysis.yml` and `.github/workflows/ossar.yml`
 - Writes daily reports to `mcp-server/security-reports/YYYY-MM-DD.json`
 - Once per week, creates a single combined update branch and one commit titled `Weekly Security Update`
 - Pushes exactly one weekly update branch and opens/updates a PR with the same title
 - Waits for PR checks to pass via GitHub CLI
 - Requires a clean git working tree for weekly commit/push safety
 - Uses scheduler run-locking to prevent overlapping daily automation runs
+- Use `npm run automation:report` to print the latest scheduler state and security report summary without opening the raw report files.
 
 ### Policy Profiles and Runbook
 
