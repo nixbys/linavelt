@@ -35,8 +35,10 @@ RUN npm ci --ignore-scripts
 # Copy the rest of the application
 COPY . .
 
-# Remove secrets before they reach the runtime stage
-RUN rm -f .env auth.json storage/oauth-private.key storage/oauth-public.key
+# Remove secrets before they reach the runtime stage and keep a placeholder
+# .env to avoid warning noise when tests probe dotenv in containerized runs.
+RUN rm -f .env auth.json storage/oauth-private.key storage/oauth-public.key \
+    && touch .env
 
 # Ensure required Laravel runtime directories exist in container build context
 RUN mkdir -p bootstrap/cache \
