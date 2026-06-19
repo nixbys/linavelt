@@ -60,11 +60,11 @@
         "@tailwindcss/typography": "^0.5.19",
         "@tailwindcss/vite": "^4.2.2",
         "autoprefixer": "^10.4.23",
-        "axios": "^1.12.0",
-        "concurrently": "^9.0.1",
+        "axios": "^1.18.0",
+        "concurrently": "^10.0.3",
         "laravel-vite-plugin": "^2.0",
         "tailwindcss": "^4.2.2",
-        "vite": "^7.1.11",
+        "vite": "^7.3.5",
         "weakmap-polyfill": "^2.0.4"
     },
     "optionalDependencies": {
@@ -73,7 +73,8 @@
         "lightningcss-linux-x64-gnu": "^1.29.1"
     },
     "overrides": {
-        "lodash": "4.18.1"
+        "lodash": "4.18.1",
+        "esbuild": "^0.28.1"
     },
     "devDependencies": {
         "@ljharb/tsconfig": "^0.3.2",
