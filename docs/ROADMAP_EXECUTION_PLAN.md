@@ -95,14 +95,16 @@ This plan turns the roadmap direction into executable, measurable workstreams.
 
 ## Execution Status (Initial)
 
-- [x] Workstream 3 initiated with `automation:report` command.
+- [x] Workstream 1 initiated with module retry controls and generation status summaries.
+- [x] Workstream 2 initiated with builder revision snapshots and publish/rollback actions.
+- [x] Workstream 3 initiated with `automation:report` command and admin observability widget.
 - [x] Workstream 4 initiated with `release-readiness` workflow and Electron smoke checks.
 - [x] Workstream 4 extended with GHCR publishing and remote quadlet deployment package.
-- [ ] Workstream 1 implementation pending schema and admin-control milestones.
-- [ ] Workstream 2 implementation pending contract and persistence milestones.
+- [ ] Workstream 1 implementation pending template schema versioning and audit-log milestones.
+- [ ] Workstream 2 implementation pending stricter content-contract and rollback persistence milestones.
 
 ## Next Recommended Iteration
 
-1. Implement module schema versioning + admin retry controls.
-2. Add builder revision persistence and publish/rollback API flow.
-3. Surface observability JSON in an admin dashboard widget.
+1. Add template schema versioning and generation audit events.
+2. Harden builder revision persistence and content contract validation.
+3. Expand the admin dashboard with per-user revision history and failed-generation filters.
