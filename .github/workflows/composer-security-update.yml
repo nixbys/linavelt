@@ -1,12 +1,16 @@
 name: composer-security-update
 
-# Runs `composer update` for packages with known security advisories and opens
-# a PR with the updated composer.lock. Requires COMPOSER_AUTH to be set in the
-# Testing environment so the private livewire/flux-pro package can be resolved.
+# Runs `composer audit` then `composer update` for packages with known
+# security advisories, and opens a PR with the updated composer.lock.
+# Requires COMPOSER_AUTH to be set in the Testing environment so the
+# private livewire/flux-pro package can be resolved.
 #
 # To configure: add a COMPOSER_AUTH secret to the Testing environment in
 # GitHub repository settings → Environments → Testing → Environment secrets:
 #   COMPOSER_AUTH = {"bearer":{"composer.fluxui.dev":"<flux-license-key>"}}
+#
+# Also add COMPOSER_AUTH to Dependabot secrets so Dependabot PRs can
+# install private PHP packages without failing their dependency install.
 
 on:
   workflow_dispatch:
