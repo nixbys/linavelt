@@ -98,10 +98,10 @@ Value: {"bearer":{"composer.fluxui.dev":"<flux-license-key>"}}
 
 ### Automated path (once COMPOSER_AUTH is configured)
 
-The `composer-security-update` workflow runs every Monday at 03:00 UTC and can be triggered manually:
+The `php-security-update` workflow runs every Monday at 03:00 UTC and can be triggered manually:
 
 ```
-gh workflow run composer-security-update.yml
+gh workflow run php-security-update.yml
 ```
 
 It runs `composer audit`, then `composer update` for vulnerable packages, and opens a PR with the updated `composer.lock`.
