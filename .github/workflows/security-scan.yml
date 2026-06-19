@@ -1,4 +1,9 @@
-name: CodeQL
+name: security-scan
+
+# Uploads a CodeQL SARIF with category "security" so that the code scanning
+# branch protection rule sees both the default scan (codeql-analysis.yml)
+# and a security-category scan, matching what was previously provided by
+# the deprecated ossar.yml workflow.
 
 on:
   push:
@@ -16,14 +21,9 @@ permissions:
 
 jobs:
   analyze:
-    name: Analyze
+    name: Analyze (security)
     runs-on: ubuntu-latest
     continue-on-error: true
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [javascript]
 
     steps:
       - name: Checkout repository
@@ -32,7 +32,9 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
-          languages: ${{ matrix.language }}
+          languages: javascript
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
+        with:
+          category: security
