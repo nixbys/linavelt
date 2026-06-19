@@ -5,8 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "check:preflight": "sh ./scripts/preflight-check.sh",
-        "release:smoke": "node ./scripts/electron-release-smoke.mjs",
+        "check:preflight": "sh ./scripts/build/preflight-check.sh",
+        "release:smoke": "node ./scripts/release/electron-release-smoke.mjs",
         "security:audit": "npm audit --omit=dev && cd mcp-server && npm audit --omit=dev",
         "electron:start": "electron .",
         "electron:pack": "electron-builder --dir",

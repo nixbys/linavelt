@@ -1,0 +1,7 @@
+# Default owner for everything not matched below
+* @nixbys
+
+# CI / security workflows require explicit sign-off
+.github/workflows/ @nixbys
+.github/dependabot.yml @nixbys
+CODEOWNERS @nixbys

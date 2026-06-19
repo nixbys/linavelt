@@ -195,14 +195,20 @@ cd mcp-server && npm run automation:report
 - routes/: web/auth/console routes
 - tests/: feature and unit tests
 - mcp-server/: automation and MCP server runtime
-- docs/: operational and integration documentation
+- docs/plan/: roadmap and planning documents
+- docs/design/: architecture and integration design notes
+- docs/operate/: runbooks and operational guides
+- scripts/build/: local quality gate and preflight checks
+- scripts/release/: release smoke tests and packaging helpers
+- scripts/ops/: infrastructure and runner setup scripts
+- containers/: Podman quadlet units and remote deployment configs
 
 ## Documentation
 
-- docs/SECURITY_AUTOMATION_RUNBOOK.md
-- docs/container-security.md
-- docs/ELECTRON_INTEGRATION.md
-- docs/ROADMAP_EXECUTION_PLAN.md
+- docs/plan/ROADMAP_EXECUTION_PLAN.md
+- docs/design/ELECTRON_INTEGRATION.md
+- docs/operate/SECURITY_AUTOMATION_RUNBOOK.md
+- docs/operate/container-security.md
 - mcp-server/README.md
 
 ## Roadmap Direction
@@ -216,7 +222,7 @@ cd mcp-server && npm run automation:report
 
 Roadmap initiatives are tracked and sequenced in:
 
-- docs/ROADMAP_EXECUTION_PLAN.md
+- docs/plan/ROADMAP_EXECUTION_PLAN.md
 
 Recommended initiation order:
 
