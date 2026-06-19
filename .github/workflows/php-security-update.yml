@@ -83,9 +83,7 @@ jobs:
             --base main \
             --head "$BRANCH" \
             --title "security: update PHP dependencies to resolve security advisories" \
-            --body "Automated composer update to address open Dependabot security alerts.
-
-Run triggered by: \`composer-security-update\` workflow."
+            --body "Automated composer update to address open Dependabot security alerts. Run triggered by: php-security-update workflow."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
