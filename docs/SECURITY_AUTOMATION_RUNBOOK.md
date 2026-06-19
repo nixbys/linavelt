@@ -18,7 +18,7 @@ This runbook describes the full security and repository health automation flow i
 - Runs npm audit in repository root.
 - Runs npm audit in mcp-server.
 - Runs composer audit.
-- Queries GitHub Dependabot and code scanning alerts (if gh is available), including the CodeQL and OSSAR workflows defined in `.github/workflows/codeql-analysis.yml` and `.github/workflows/ossar.yml`.
+- Queries GitHub Dependabot and code scanning alerts (if gh is available), including the CodeQL workflows defined in `.github/workflows/codeql-analysis.yml` (default category) and `.github/workflows/security-scan.yml` (security category).
 - Writes a dated report JSON in security-reports.
 
 2. Repo health phase (daily)
@@ -82,6 +82,38 @@ Guardrails:
 - Failure reports are upserted, not appended repeatedly.
 - Duplicate managed comments are deleted automatically.
 - Managed comments are removed from PRs when failures clear.
+
+## PHP Security Updates
+
+PHP (Composer) security updates require the `livewire/flux-pro` private package credentials, which are not available in the standard CI environment.
+
+### Prerequisite: configure COMPOSER_AUTH
+
+Add the following secret to the **Testing** GitHub environment (Settings → Environments → Testing → Environment secrets) AND to **Dependabot secrets** (Settings → Security → Dependabot secrets):
+
+```
+Name:  COMPOSER_AUTH
+Value: {"bearer":{"composer.fluxui.dev":"<flux-license-key>"}}
+```
+
+### Automated path (once COMPOSER_AUTH is configured)
+
+The `composer-security-update` workflow runs every Monday at 03:00 UTC and can be triggered manually:
+
+```
+gh workflow run composer-security-update.yml
+```
+
+It runs `composer audit`, then `composer update` for vulnerable packages, and opens a PR with the updated `composer.lock`.
+
+### Manual path (local)
+
+Ensure an `auth.json` with the flux-pro credentials exists in the repo root, then:
+
+```sh
+composer update laravel/framework symfony/mime symfony/http-foundation guzzlehttp/psr7 \
+  symfony/routing symfony/http-kernel symfony/mailer symfony/yaml symfony/polyfill-intl-idn
+```
 
 ## Failure Recovery
 
