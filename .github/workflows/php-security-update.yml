@@ -1,4 +1,4 @@
-name: composer-security-update
+name: php-security-update
 
 # Runs `composer audit` then `composer update` for packages with known
 # security advisories, and opens a PR with the updated composer.lock.
@@ -7,7 +7,7 @@ name: composer-security-update
 #
 # To configure: add a COMPOSER_AUTH secret to the Testing environment in
 # GitHub repository settings → Environments → Testing → Environment secrets:
-#   COMPOSER_AUTH = {"bearer":{"composer.fluxui.dev":"<flux-license-key>"}}
+#   COMPOSER_AUTH = {"http-basic":{"composer.fluxui.dev":{"username":"<email>","password":"<license-key>"}}}
 #
 # Also add COMPOSER_AUTH to Dependabot secrets so Dependabot PRs can
 # install private PHP packages without failing their dependency install.
@@ -17,19 +17,23 @@ on:
   schedule:
     - cron: 0 3 * * 1
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
   composer-update:
-    name: composer-security-update
+    name: php-security-update
     runs-on: ubuntu-latest
     environment: Testing
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
