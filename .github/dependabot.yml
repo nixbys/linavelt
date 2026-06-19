@@ -6,20 +6,29 @@
 # Dependabot configuration for managing dependencies in the project
 version: 2
 updates:
-  # Update PHP dependencies
+  # Update PHP dependencies — flux-pro is a private Satis package requiring
+  # COMPOSER_AUTH; ignore it so Dependabot can still update public packages.
   - package-ecosystem: "composer"
-    directory: "/" # Root directory for composer.json
+    directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "livewire/flux-pro"
 
   # Update Node.js dependencies
   - package-ecosystem: "npm"
-    directory: "/" # Root directory for package.json
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Update Node.js dependencies in mcp-server
+  - package-ecosystem: "npm"
+    directory: "/mcp-server"
     schedule:
       interval: "weekly"
 
   # Update GitHub Actions
   - package-ecosystem: "github-actions"
-    directory: "/.github/workflows" # Directory for GitHub Actions workflows
+    directory: "/.github/workflows"
     schedule:
-      interval: "weekly" 
+      interval: "weekly"
