@@ -22,8 +22,11 @@
         "start:all": "node server.js & node scheduler.js"
     },
     "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.26.0",
-        "dotenv": "^17.2.3",
-        "express": "^4.22.1"
+        "@modelcontextprotocol/sdk": "^1.29.0",
+        "dotenv": "^17.4.2",
+        "express": "^5.2.1"
+    },
+    "devDependencies": {
+        "electron": "^42.4.1"
     }
 }
