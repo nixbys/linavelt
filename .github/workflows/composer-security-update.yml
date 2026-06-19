@@ -1,0 +1,87 @@
+name: composer-security-update
+
+# Runs `composer update` for packages with known security advisories and opens
+# a PR with the updated composer.lock. Requires COMPOSER_AUTH to be set in the
+# Testing environment so the private livewire/flux-pro package can be resolved.
+#
+# To configure: add a COMPOSER_AUTH secret to the Testing environment in
+# GitHub repository settings → Environments → Testing → Environment secrets:
+#   COMPOSER_AUTH = {"bearer":{"composer.fluxui.dev":"<flux-license-key>"}}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 3 * * 1
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  composer-update:
+    name: composer-security-update
+    runs-on: ubuntu-latest
+    environment: Testing
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+
+      - name: Run composer audit
+        id: audit
+        run: |
+          if composer audit --format=json > /tmp/composer-audit.json 2>&1; then
+            echo "clean=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "clean=false" >> "$GITHUB_OUTPUT"
+            cat /tmp/composer-audit.json
+          fi
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+
+      - name: Update vulnerable packages
+        if: steps.audit.outputs.clean == 'false'
+        run: composer update --with-all-dependencies --no-interaction
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet composer.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open PR with updated composer.lock
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          BRANCH="automation/composer-security-$(date +%Y-%m-%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add composer.lock
+          git commit -m "security: update composer.lock to resolve PHP security advisories"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "security: update PHP dependencies to resolve security advisories" \
+            --body "Automated composer update to address open Dependabot security alerts.
+
+Run triggered by: \`composer-security-update\` workflow."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
