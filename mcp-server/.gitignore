@@ -1,0 +1,8 @@
+node_modules/
+server.log
+security-automation.log
+security-reports/
+security-automation-state.json
+.mcp-server.pid
+.scheduler.pid
+.automation.pid
