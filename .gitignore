@@ -21,6 +21,7 @@ yarn-error.log
 # MCP scheduler runtime state
 mcp-server/scheduler-state.json
 mcp-server/scheduler.log
+mcp-server/server.log
 mcp-server/.mcp-server.pid
 mcp-server/.mcp-scheduler.pid
 mcp-server/security-automation-state.json
@@ -33,6 +34,7 @@ results.txt
 /.nova
 /.vscode
 /.zed
+/.claude/*
 # Ignore extracted actions-runner directory
 actions-runner/
 # Electron build output
