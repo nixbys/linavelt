@@ -78,7 +78,7 @@
     },
     "devDependencies": {
         "@ljharb/tsconfig": "^0.3.2",
-        "electron": "^42.4.1",
+        "electron": "^42.5.0",
         "electron-builder": "^26.15.3"
     },
     "engines": {
