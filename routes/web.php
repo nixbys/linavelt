@@ -3,9 +3,14 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BuilderOnboardingController;
+use App\Http\Controllers\PageBuilderController;
+use App\Http\Controllers\ProjectController;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
+
+RateLimiter::for('builder-save', fn () => \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by(auth()->id()));
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,14 +55,45 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 });
 
-// Blog Routes
+// Page Builder (legacy page designs)
+Route::middleware(['auth', 'verified'])->prefix('builder/designs')->name('builder.designs.')->group(function () {
+    Route::get('/',                  [PageBuilderController::class, 'index'])->name('index');
+    Route::get('/create',            [PageBuilderController::class, 'create'])->name('create');
+    Route::get('/{design}/edit',     [PageBuilderController::class, 'edit'])->name('edit');
+    Route::get('/{design}/data',     [PageBuilderController::class, 'data'])->name('data');
+    Route::post('/save',             [PageBuilderController::class, 'save'])->middleware('throttle:builder-save')->name('save');
+    Route::post('/{design}/publish', [PageBuilderController::class, 'publish'])->name('publish');
+    Route::delete('/{design}',       [PageBuilderController::class, 'destroy'])->name('destroy');
+});
+
+// Projects
+Route::middleware(['auth', 'verified'])->prefix('projects')->name('projects.')->group(function () {
+    Route::get('/',                   [ProjectController::class, 'index'])->name('index');
+    Route::get('/create',             [ProjectController::class, 'create'])->name('create');
+    Route::post('/',                  [ProjectController::class, 'store'])->name('store');
+    Route::post('/save',              [ProjectController::class, 'save'])->middleware('throttle:builder-save')->name('save');
+    Route::get('/{project}',          [ProjectController::class, 'show'])->name('show');
+    Route::get('/{project}/canvas',   [ProjectController::class, 'canvas'])->name('canvas');
+    Route::get('/{project}/data',     [ProjectController::class, 'data'])->name('data');
+    Route::post('/{project}/publish', [ProjectController::class, 'publish'])->name('publish');
+    Route::delete('/{project}',       [ProjectController::class, 'destroy'])->name('destroy');
+});
+
+// Extensions marketplace
+Route::middleware(['auth', 'verified'])
+    ->get('/extensions', function () {
+        return view('extensions.index');
+    })
+    ->name('extensions.index');
+
+// Blog
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 
-// Admin Routes
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::post('/admin/users/{user}/module-generation/retry', [AdminController::class, 'retryModuleGeneration'])
-        ->name('admin.module-generation.retry');
+// Admin (requires is_admin gate)
+Route::middleware(['auth', 'verified', 'can:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::post('/users/{user}/module-generation/retry', [AdminController::class, 'retryModuleGeneration'])
+        ->name('module-generation.retry');
 });
 
 require __DIR__.'/auth.php';
