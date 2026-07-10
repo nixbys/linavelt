@@ -58,19 +58,19 @@
         "@tailwindcss/aspect-ratio": "^0.4.2",
         "@tailwindcss/forms": "^0.5.11",
         "@tailwindcss/typography": "^0.5.20",
-        "@tailwindcss/vite": "^4.3.1",
+        "@tailwindcss/vite": "^4.3.2",
         "autoprefixer": "^10.5.2",
         "axios": "^1.18.1",
         "concurrently": "^10.0.3",
         "grapesjs": "^0.23.2",
         "laravel-vite-plugin": "^3.0",
-        "tailwindcss": "^4.3.1",
-        "vite": "^8.1.0",
+        "tailwindcss": "^4.3.2",
+        "vite": "^8.1.2",
         "weakmap-polyfill": "^2.0.4"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "^4.62.2",
-        "@tailwindcss/oxide-linux-x64-gnu": "^4.3.1",
+        "@tailwindcss/oxide-linux-x64-gnu": "^4.3.2",
         "lightningcss-linux-x64-gnu": "^1.29.1"
     },
     "overrides": {
@@ -79,7 +79,7 @@
     },
     "devDependencies": {
         "@ljharb/tsconfig": "^0.3.2",
-        "electron": "^42.4.1",
+        "electron": "^43.0.0",
         "electron-builder": "^26.15.3"
     },
     "engines": {
