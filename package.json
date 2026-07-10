@@ -63,13 +63,13 @@
         "axios": "^1.18.1",
         "concurrently": "^10.0.3",
         "laravel-vite-plugin": "^3.0",
-        "tailwindcss": "^4.3.1",
-        "vite": "^8.1.0",
+        "tailwindcss": "^4.3.2",
+        "vite": "^8.1.2",
         "weakmap-polyfill": "^2.0.4"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "^4.62.2",
-        "@tailwindcss/oxide-linux-x64-gnu": "^4.3.1",
+        "@tailwindcss/oxide-linux-x64-gnu": "^4.3.2",
         "lightningcss-linux-x64-gnu": "^1.29.1"
     },
     "overrides": {
