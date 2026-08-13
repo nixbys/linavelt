@@ -198,7 +198,8 @@ function initEditor() {
         canvas: {
             styles: [
                 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-                // Inline Tailwind CDN for canvas iframe preview
+            ],
+            scripts: [
                 'https://cdn.jsdelivr.net/npm/@tailwindcss/cdn@4/dist/index.min.js',
             ],
         },
