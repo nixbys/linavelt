@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('status', 20)->default('draft');
             $table->json('project_data')->nullable();
             $table->longText('html')->nullable();
-            $table->text('css')->nullable();
+            $table->longText('css')->nullable();
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
 
