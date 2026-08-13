@@ -5,12 +5,13 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BuilderOnboardingController;
 use App\Http\Controllers\PageBuilderController;
 use App\Http\Controllers\ProjectController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
-RateLimiter::for('builder-save', fn () => \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by(auth()->id()));
+RateLimiter::for('builder-save', fn (Request $request) => \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by($request->user()?->id ?? $request->ip()));
 
 Route::get('/', function () {
     return view('welcome');
