@@ -1,6 +1,7 @@
 @php
     $lang = collect(config('technologies.languages', []))->firstWhere('id', $project->language);
-    $typeLabel = collect(config('technologies.project_types', []))->firstWhere('id', $project->type)['label'] ?? ucfirst($project->type);
+    $type = collect(config('technologies.project_types', []))->firstWhere('id', $project->type);
+    $typeLabel = $type['label'] ?? ucfirst($project->type);
     $fwLabel = null;
     if ($project->framework && $project->language) {
         $fw = collect(config("technologies.frameworks.{$project->language}", []))->firstWhere('id', $project->framework);
