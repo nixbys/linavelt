@@ -66,7 +66,8 @@
                     'draft'     => ['pill' => 'bg-zinc-800 text-zinc-400 border-zinc-700', 'dot' => 'bg-zinc-500'],
                 ];
                 $st = $statusMap[$project->status] ?? $statusMap['draft'];
-                $typeLabel = collect(config('technologies.project_types', []))->firstWhere('id', $project->type)['label'] ?? ucfirst($project->type);
+                $type = collect(config('technologies.project_types', []))->firstWhere('id', $project->type);
+                $typeLabel = $type['label'] ?? ucfirst($project->type);
             @endphp
 
             <article class="group flex flex-col rounded-2xl border border-zinc-700 bg-zinc-900 transition-colors hover:border-zinc-600">
