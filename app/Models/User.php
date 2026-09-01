@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 use App\Models\BuilderRevision;
+use App\Models\PageDesign;
+use App\Models\Project;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -26,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'is_admin',
         'onboarding_preferences',
         'onboarding_completed_at',
         'module_generation_status',
@@ -41,6 +44,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -51,11 +56,12 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'onboarding_preferences' => 'array',
-            'onboarding_completed_at' => 'datetime',
-            'module_generation_started_at' => 'datetime',
+            'email_verified_at'              => 'datetime',
+            'password'                       => 'hashed',
+            'is_admin'                       => 'boolean',
+            'onboarding_preferences'         => 'array',
+            'onboarding_completed_at'        => 'datetime',
+            'module_generation_started_at'   => 'datetime',
             'module_generation_completed_at' => 'datetime',
         ];
     }
@@ -78,5 +84,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function builderRevisions(): HasMany
     {
         return $this->hasMany(BuilderRevision::class);
+    }
+
+    public function pageDesigns(): HasMany
+    {
+        return $this->hasMany(PageDesign::class);
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
     }
 }
