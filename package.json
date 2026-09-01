@@ -62,14 +62,15 @@
         "autoprefixer": "^10.5.4",
         "axios": "^1.18.1",
         "concurrently": "^10.0.3",
-        "laravel-vite-plugin": "^3.0",
+        "grapesjs": "^0.23.2",
+        "laravel-vite-plugin": "^3.2",
         "tailwindcss": "^4.3.2",
         "vite": "^8.1.5",
         "weakmap-polyfill": "^2.0.4"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "^4.62.2",
-        "@tailwindcss/oxide-linux-x64-gnu": "^4.3.2",
+        "@tailwindcss/oxide-linux-x64-gnu": "^4.3.3",
         "lightningcss-linux-x64-gnu": "^1.29.1"
     },
     "overrides": {
@@ -78,7 +79,7 @@
     },
     "devDependencies": {
         "@ljharb/tsconfig": "^0.3.2",
-        "electron": "^43.0.0",
+        "electron": "^44.0.0",
         "electron-builder": "^26.15.3"
     },
     "engines": {
