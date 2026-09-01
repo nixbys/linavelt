@@ -18,7 +18,7 @@
                     <flux:navlist.item icon="puzzle-piece" :href="route('extensions.index')" :current="request()->routeIs('extensions.*')" wire:navigate>{{ __('Extensions') }}</flux:navlist.item>
                 </flux:navlist.group>
                 <flux:navlist.group :heading="__('Tools')" class="grid">
-                    <flux:navlist.item icon="sparkles" :href="route('builder.onboarding')" :current="request()->routeIs('builder.onboarding')" wire:navigate>{{ __('Onboarding') }}</flux:navlist.item>
+                    <flux:navlist.item icon="sparkles" :href="route('builder.onboarding')" :current="request()->routeIs('builder.onboarding')" wire:navigate>{{ __('Builder Onboarding') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 

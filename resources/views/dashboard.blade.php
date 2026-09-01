@@ -1,150 +1,159 @@
 <x-layouts.app :title="__('Dashboard')">
     @php
-        $user = auth()->user();
         $dashboard = config('linavelt.dashboard', []);
         $metrics = $dashboard['metrics'] ?? [];
         $workstreams = $dashboard['workstreams'] ?? [];
         $domains = config('linavelt.onboarding.domains', []);
 
-        $userSelections = $user?->onboarding_preferences ?? [];
-        $onboardingCompletedAt = $user?->onboarding_completed_at;
-        $moduleGenerationStatus = $user?->module_generation_status;
-        $moduleGenerationCompletedAt = $user?->module_generation_completed_at;
+        $userSelections = auth()->user()?->onboarding_preferences ?? [];
+        $onboardingCompletedAt = auth()->user()?->onboarding_completed_at;
+        $moduleGenerationStatus = auth()->user()?->module_generation_status;
+        $moduleGenerationCompletedAt = auth()->user()?->module_generation_completed_at;
 
         $selectionCards = [];
+
         foreach ($domains as $domain) {
             $key = $domain['key'] ?? null;
-            if ($key && isset($userSelections[$key])) {
-                $selectionCards[] = ['name' => $domain['name'], 'value' => $userSelections[$key]];
+
+            if (! $key || ! isset($userSelections[$key])) {
+                continue;
             }
+
+            $selectionCards[] = [
+                'name' => $domain['name'],
+                'value' => $userSelections[$key],
+            ];
         }
 
         $totalDomains = count($domains);
         $completedDomains = count($selectionCards);
         $completionPercentage = $totalDomains > 0 ? (int) round(($completedDomains / $totalDomains) * 100) : 0;
-
-        $statusMap = [
-            'pending'  => ['pill' => 'border-amber-700/50 bg-amber-900/30 text-amber-300',  'label' => 'Pending — queued'],
-            'running'  => ['pill' => 'border-blue-700/50 bg-blue-900/30 text-blue-300',     'label' => 'Running — generating…'],
-            'complete' => ['pill' => 'border-emerald-700/50 bg-emerald-900/30 text-emerald-300', 'label' => 'Complete'],
-            'failed'   => ['pill' => 'border-rose-700/50 bg-rose-900/30 text-rose-300',     'label' => 'Failed — re-save to retry'],
-        ];
-        $statusInfo = $statusMap[$moduleGenerationStatus] ?? ['pill' => 'border-zinc-700 bg-zinc-800 text-zinc-400', 'label' => ucfirst((string) $moduleGenerationStatus)];
     @endphp
 
     <div class="space-y-5">
-
-        {{-- ── Hero ────────────────────────────────────────────────── --}}
-        <section class="overflow-hidden rounded-3xl border border-zinc-700/40 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 sm:p-8">
-            <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500">{{ $dashboard['kicker'] ?? 'Visual Builder' }}</p>
-            <h1 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
-                {{ $dashboard['title'] ?? 'Welcome to Linavelt' }}
+        <section class="overflow-hidden rounded-3xl border border-orange-200/20 bg-gradient-to-br from-[#1b1f3a] via-[#111526] to-[#2a160f] p-6 sm:p-8">
+            <p class="text-xs font-semibold uppercase tracking-[0.17em] text-orange-200/80">{{ $dashboard['kicker'] ?? '' }}</p>
+            <h1 class="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                {{ $dashboard['title'] ?? '' }}
             </h1>
-            <p class="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-400 sm:text-base">
-                {{ $dashboard['description'] ?? 'Build websites and apps visually, in any language, with any stack.' }}
+            <p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-200/85 sm:text-base">
+                {{ $dashboard['description'] ?? '' }}
             </p>
 
             <div class="mt-6 flex flex-wrap gap-3">
-                <a href="{{ route('projects.index') }}"
-                   class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-100">
-                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/>
-                    </svg>
+                <a href="{{ route('projects.index') }}" class="rounded-xl border border-orange-300/35 bg-orange-500 px-4 py-2 text-sm font-semibold text-[#23140e] transition hover:bg-orange-400">
                     Open Projects
                 </a>
-                <a href="{{ route('builder.onboarding') }}"
-                   class="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-100">
-                    {{ $onboardingCompletedAt ? 'Update Stack Profile' : 'Complete Onboarding' }}
+                <a href="{{ route('builder.onboarding') }}" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20">
+                    {{ $onboardingCompletedAt ? 'Update Stack Profile' : 'Continue Onboarding' }}
                 </a>
             </div>
         </section>
 
-        {{-- ── Metric cards ─────────────────────────────────────────── --}}
-        @if(count($metrics))
-        <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section class="grid gap-4 md:grid-cols-4">
             @foreach ($metrics as $metric)
-                <article class="rounded-2xl border border-zinc-700 bg-zinc-900 p-5">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500">{{ $metric['label'] }}</p>
-                    <p class="mt-2 text-2xl font-semibold text-zinc-100">{{ $metric['value'] }}</p>
-                    <p class="mt-1.5 text-sm text-zinc-400">{{ $metric['hint'] }}</p>
+                <article class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
+                    <p class="text-xs uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">{{ $metric['label'] }}</p>
+                    <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $metric['value'] }}</p>
+                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{{ $metric['hint'] }}</p>
                 </article>
             @endforeach
 
-            <article class="rounded-2xl border border-zinc-700 bg-zinc-900 p-5">
-                <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500">Stack Profile</p>
-                <p class="mt-2 text-2xl font-semibold text-zinc-100">{{ $completionPercentage }}%</p>
-                <div class="mt-3 h-1.5 rounded-full bg-zinc-800">
-                    <div class="h-1.5 rounded-full bg-white transition-all" style="width: {{ $completionPercentage }}%"></div>
+            <article class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
+                <p class="text-xs uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">Stack Profile Completion</p>
+                <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $completionPercentage }}%</p>
+                <div class="mt-3 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700">
+                    <div class="h-2 rounded-full bg-orange-500 transition-all" style="width: {{ $completionPercentage }}%"></div>
                 </div>
-                <p class="mt-2 text-sm text-zinc-400">{{ $completedDomains }} of {{ $totalDomains }} domains set</p>
+                <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{{ $completedDomains }} of {{ $totalDomains }} onboarding domains selected.</p>
             </article>
         </section>
-        @endif
 
-        {{-- ── Detail grid ──────────────────────────────────────────── --}}
-        <section class="grid gap-4 lg:grid-cols-3">
+        <section class="grid gap-4 lg:grid-cols-[1.1fr_1fr_1fr_1fr]">
+            <article class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Saved Stack Profile</h2>
+                @if ($onboardingCompletedAt)
+                    <p class="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">
+                        Completed {{ $onboardingCompletedAt->diffForHumans() }}
+                    </p>
+                @endif
 
-            {{-- Stack profile --}}
-            <article class="rounded-2xl border border-zinc-700 bg-zinc-900 p-5">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-sm font-semibold uppercase tracking-widest text-zinc-500">Stack Profile</h2>
-                    @if($onboardingCompletedAt)
-                        <span class="text-xs text-zinc-600">{{ $onboardingCompletedAt->diffForHumans() }}</span>
-                    @endif
-                </div>
-
-                @if(count($selectionCards))
-                    <ul class="mt-4 space-y-2">
+                @if (count($selectionCards))
+                    <ul class="mt-3 space-y-2">
                         @foreach ($selectionCards as $selection)
-                            <li class="rounded-lg border border-zinc-800 bg-zinc-800/50 px-3 py-2">
-                                <p class="text-xs font-medium uppercase tracking-widest text-zinc-500">{{ $selection['name'] }}</p>
-                                <p class="mt-0.5 text-sm font-medium text-zinc-200">{{ $selection['value'] }}</p>
+                            <li class="rounded-lg border border-zinc-200 px-3 py-2 dark:border-zinc-700">
+                                <p class="text-xs uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">{{ $selection['name'] }}</p>
+                                <p class="mt-1 text-sm font-medium text-zinc-800 dark:text-zinc-100">{{ $selection['value'] }}</p>
                             </li>
                         @endforeach
                     </ul>
                 @else
-                    <p class="mt-4 text-sm text-zinc-500">No selections saved yet.</p>
-                    <a href="{{ route('builder.onboarding') }}"
-                       class="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-100">
-                        Complete onboarding
+                    <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-300">
+                        No profile selections saved yet.
+                    </p>
+                    <a href="{{ route('builder.onboarding') }}" class="mt-3 inline-flex rounded-lg border border-orange-300/40 bg-orange-500 px-3 py-2 text-xs font-semibold text-[#23140e] transition hover:bg-orange-400">
+                        Complete Onboarding
                     </a>
                 @endif
             </article>
 
-            {{-- Workstreams --}}
             @foreach ($workstreams as $stream)
-                <article class="rounded-2xl border border-zinc-700 bg-zinc-900 p-5">
-                    <h2 class="text-sm font-semibold uppercase tracking-widest text-zinc-500">{{ $stream['title'] }}</h2>
-                    <p class="mt-3 text-sm leading-relaxed text-zinc-400">{{ $stream['text'] }}</p>
+                <article class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
+                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $stream['title'] }}</h2>
+                    <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+                        {{ $stream['text'] }}
+                    </p>
                 </article>
             @endforeach
-
         </section>
 
-        {{-- ── Module generation status ─────────────────────────────── --}}
-        @if($moduleGenerationStatus)
-            <section class="rounded-2xl border border-zinc-700 bg-zinc-900 p-5">
+        @if ($moduleGenerationStatus)
+            <section class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h2 class="text-sm font-semibold uppercase tracking-widest text-zinc-500">Module Generation</h2>
-                        <p class="mt-1 text-sm text-zinc-400">Background orchestration of project modules based on your stack profile.</p>
+                        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Module Generation</h2>
+                        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+                            Background orchestration of project modules based on your stack profile.
+                        </p>
                     </div>
-                    <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $statusInfo['pill'] }}">
-                        {{ $statusInfo['label'] }}
+
+                    @php
+                        $statusColor = match ($moduleGenerationStatus) {
+                            'pending'  => 'border-amber-300/50 bg-amber-100 text-amber-800 dark:border-amber-500/40 dark:bg-amber-900/30 dark:text-amber-200',
+                            'running'  => 'border-blue-300/50 bg-blue-100 text-blue-800 dark:border-blue-500/40 dark:bg-blue-900/30 dark:text-blue-200',
+                            'complete' => 'border-emerald-300/50 bg-emerald-100 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-900/30 dark:text-emerald-200',
+                            'failed'   => 'border-rose-300/50 bg-rose-100 text-rose-800 dark:border-rose-500/40 dark:bg-rose-900/30 dark:text-rose-200',
+                            default    => 'border-zinc-300/50 bg-zinc-100 text-zinc-800 dark:border-zinc-500/40 dark:bg-zinc-800 dark:text-zinc-200',
+                        };
+                        $statusLabel = match ($moduleGenerationStatus) {
+                            'pending'  => 'Pending — queued for execution',
+                            'running'  => 'Running — generating modules…',
+                            'complete' => 'Complete',
+                            'failed'   => 'Failed — will retry',
+                            default    => ucfirst($moduleGenerationStatus),
+                        };
+                    @endphp
+
+                    <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $statusColor }}">
+                        {{ $statusLabel }}
                     </span>
                 </div>
 
-                @if($moduleGenerationStatus === 'running')
-                    <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
-                        <div class="h-1.5 animate-pulse rounded-full bg-blue-500" style="width: 60%"></div>
+                @if ($moduleGenerationStatus === 'running')
+                    <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+                        <div class="h-2 animate-pulse rounded-full bg-blue-500" style="width: 60%"></div>
                     </div>
-                @elseif($moduleGenerationStatus === 'complete' && $moduleGenerationCompletedAt)
-                    <p class="mt-3 text-xs text-zinc-500">Completed {{ $moduleGenerationCompletedAt->diffForHumans() }}. Project files are stored and ready.</p>
-                @elseif($moduleGenerationStatus === 'failed')
-                    <p class="mt-3 text-xs text-rose-400">Generation encountered an error. Re-save your stack profile to re-queue.</p>
+                @elseif ($moduleGenerationStatus === 'complete' && $moduleGenerationCompletedAt)
+                    <p class="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+                        Completed {{ $moduleGenerationCompletedAt->diffForHumans() }}.
+                        Project files are stored and ready.
+                    </p>
+                @elseif ($moduleGenerationStatus === 'failed')
+                    <p class="mt-3 text-xs text-rose-600 dark:text-rose-300">
+                        Generation encountered an error. Re-save your stack profile to re-queue.
+                    </p>
                 @endif
             </section>
         @endif
-
     </div>
 </x-layouts.app>

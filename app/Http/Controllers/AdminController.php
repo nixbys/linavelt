@@ -45,7 +45,7 @@ class AdminController extends Controller
         }
 
         $user->forceFill([
-            'module_generation_status'    => 'pending',
+            'module_generation_status'       => 'pending',
             'module_generation_started_at'   => null,
             'module_generation_completed_at' => null,
         ])->save();

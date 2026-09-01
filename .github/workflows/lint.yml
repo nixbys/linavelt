@@ -47,6 +47,8 @@ jobs:
             echo "::warning::Composer install failed (likely private package auth); skipping PHP quality steps."
             echo "ok=false" >> "$GITHUB_OUTPUT"
           fi
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
       - name: Setup Node
         uses: actions/setup-node@v5
@@ -64,6 +66,8 @@ jobs:
         run: |
           composer validate
           composer install --no-interaction
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
       - name: Run Pint
         if: steps.composer_install.outputs.ok == 'true'
