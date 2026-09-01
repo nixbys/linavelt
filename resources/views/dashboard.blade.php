@@ -41,11 +41,11 @@
             </p>
 
             <div class="mt-6 flex flex-wrap gap-3">
-                <a href="{{ route('builder.onboarding') }}" class="rounded-xl border border-orange-300/35 bg-orange-500 px-4 py-2 text-sm font-semibold text-[#23140e] transition hover:bg-orange-400">
-                    {{ $onboardingCompletedAt ? 'Update Stack Profile' : 'Continue Onboarding' }}
+                <a href="{{ route('projects.index') }}" class="rounded-xl border border-orange-300/35 bg-orange-500 px-4 py-2 text-sm font-semibold text-[#23140e] transition hover:bg-orange-400">
+                    Open Projects
                 </a>
-                <a href="{{ route('blog.index') }}" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20">
-                    Read Product Notes
+                <a href="{{ route('builder.onboarding') }}" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20">
+                    {{ $onboardingCompletedAt ? 'Update Stack Profile' : 'Continue Onboarding' }}
                 </a>
             </div>
         </section>

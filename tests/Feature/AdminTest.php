@@ -19,10 +19,21 @@ class AdminTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    public function test_authenticated_users_can_visit_admin_dashboard(): void
+    public function test_non_admin_users_cannot_visit_admin_dashboard(): void
     {
         /** @var User $user */
         $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('admin.dashboard'));
+
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_users_can_visit_admin_dashboard(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->admin()->create();
         $this->actingAs($user);
 
         $response = $this->get(route('admin.dashboard'));
@@ -44,7 +55,7 @@ class AdminTest extends TestCase
     public function test_admin_dashboard_shows_security_and_module_generation_summaries(): void
     {
         /** @var User $user */
-        $user = User::factory()->create([
+        $user = User::factory()->admin()->create([
             'module_generation_status' => 'failed',
             'onboarding_preferences' => [
                 'frontend_layer' => 'Livewire + Flux',
@@ -78,7 +89,7 @@ class AdminTest extends TestCase
         ]);
 
         /** @var User $actor */
-        $actor = User::factory()->create();
+        $actor = User::factory()->admin()->create();
 
         $this->actingAs($actor)
             ->post(route('admin.module-generation.retry', $user))
