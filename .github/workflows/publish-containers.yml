@@ -20,6 +20,9 @@ jobs:
   publish:
     name: publish-${{ matrix.image.name }}
     runs-on: ubuntu-latest
+    # Needed for COMPOSER_AUTH: the app image's Containerfile fetches the
+    # private livewire/flux-pro package and expects an auth.json at build time.
+    environment: Testing
     strategy:
       fail-fast: false
       matrix:
@@ -45,6 +48,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write composer auth for private Flux Pro package
+        if: matrix.image.name == 'app'
+        run: echo "${COMPOSER_AUTH}" > auth.json
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
       - name: Derive tags
         id: tags
@@ -73,3 +82,7 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.title=Linavelt ${{ matrix.image.name }}
+
+      - name: Remove composer auth from runner
+        if: always() && matrix.image.name == 'app'
+        run: rm -f auth.json
