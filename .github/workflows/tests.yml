@@ -62,6 +62,8 @@ jobs:
             echo "::warning::Composer install failed (likely private package auth); skipping PHP test steps."
             echo "ok=false" >> "$GITHUB_OUTPUT"
           fi
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
       - name: Copy Environment File
         if: steps.composer_install.outputs.ok == 'true'
