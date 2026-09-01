@@ -76,18 +76,20 @@ jobs:
       - name: Open PR with updated composer.lock
         if: steps.changes.outputs.changed == 'true'
         run: |
-          BRANCH="automation/composer-security-$(date +%Y-%m-%d)"
+          BRANCH="automation/composer-security"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
+          git checkout -B "$BRANCH"
           git add composer.lock
           git commit -m "security: update composer.lock to resolve PHP security advisories"
-          git push origin "$BRANCH"
-          gh pr create \
-            --base main \
-            --head "$BRANCH" \
-            --title "security: update PHP dependencies to resolve security advisories" \
-            --body "Automated composer update to address open Dependabot security alerts. Run triggered by: php-security-update workflow."
+          git push --force origin "$BRANCH"
+          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "security: update PHP dependencies to resolve security advisories" \
+              --body "Automated composer update to address open Dependabot security alerts. Run triggered by: php-security-update workflow."
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
