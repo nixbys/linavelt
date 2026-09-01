@@ -16,22 +16,7 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-lg bg-gray-800 p-4 shadow-md">
-                <h2 class="text-xl font-bold text-gray-100">Users</h2>
-                <p class="mt-2 text-sm text-gray-400">{{ $data['users'] }} registered users.</p>
-            </div>
-
-            <div class="rounded-lg bg-gray-800 p-4 shadow-md">
-                <h2 class="text-xl font-bold text-gray-100">Posts</h2>
-                <p class="mt-2 text-sm text-gray-400">{{ $data['posts'] }} blog posts.</p>
-            </div>
-
-            <div class="rounded-lg bg-gray-800 p-4 shadow-md">
-                <h2 class="text-xl font-bold text-gray-100">Settings</h2>
-                <p class="mt-2 text-sm text-gray-400">{{ $data['settings'] }} configurable settings.</p>
-            </div>
-
+        <div class="grid grid-cols-1 gap-6">
             <div class="rounded-lg bg-gray-800 p-4 shadow-md">
                 <h2 class="text-xl font-bold text-gray-100">Automation Report</h2>
                 <p class="mt-2 text-sm text-gray-400">
