@@ -64,8 +64,8 @@
         "concurrently": "^10.0.3",
         "grapesjs": "^0.23.2",
         "laravel-vite-plugin": "^3.2",
-        "tailwindcss": "^4.3.2",
-        "vite": "^8.1.5",
+        "tailwindcss": "^4.3.3",
+        "vite": "^8.2.2",
         "weakmap-polyfill": "^2.0.4"
     },
     "optionalDependencies": {
