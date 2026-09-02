@@ -71,7 +71,7 @@
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "^4.63.1",
         "@tailwindcss/oxide-linux-x64-gnu": "^4.3.3",
-        "lightningcss-linux-x64-gnu": "^1.29.1"
+        "lightningcss-linux-x64-gnu": "^1.33.0"
     },
     "overrides": {
         "lodash": "4.18.1",
