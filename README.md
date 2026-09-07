@@ -237,6 +237,26 @@ Initial execution already in-repo:
 - PR release-readiness workflow: `.github/workflows/release-readiness.yml`
 - Electron release smoke command: `npm run release:smoke`
 
+## Security
+
+Linavelt handles real user accounts and runs an MCP automation server that
+can open pull requests and write to the repository, so security has two
+reference documents plus a CI enforcement layer:
+
+- `SECURITY.md` — how to report a vulnerability, and deployment guidance
+  (debug mode, session cookies, queue/cache backends, `BCRYPT_ROUNDS`) for
+  anything beyond localhost.
+- `THREAT_MODEL.md` — the trust boundary between the Laravel app, the
+  Electron shell, and the MCP server, and what each is and isn't meant to
+  defend against.
+- CI enforces this on every push/PR: `secret-scan.yml` (gitleaks, full
+  history), `security-scan.yml`, `codeql-analysis.yml`, `dependency-review.yml`,
+  `workflow-security.yml` (actionlint/zizmor against the workflows
+  themselves — configured in `.github/zizmor.yml`), and `php-security-update.yml`.
+- `.pre-commit-config.yaml` offers the same gitleaks check plus Laravel
+  Pint locally, for contributors who want it before `npm run
+  check:preflight` runs in CI.
+
 ## Contributing
 
 Contributions are welcome through focused pull requests with clear test coverage and changelog-ready summaries.
