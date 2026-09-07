@@ -1,0 +1,32 @@
+# zizmor ignore config
+#
+# The workflows below predate this repo's adoption of zizmor
+# (workflow-security.yml) and pin GitHub Actions to floating major-version
+# tags (e.g. actions/checkout@v5) rather than exact commit SHAs; Dependabot
+# already keeps those tags current on a weekly cadence
+# (.github/dependabot.yml, github-actions ecosystem). Re-pinning all of them
+# to SHAs is a larger, separate change from adding the security tooling
+# itself and is tracked as a follow-up, not done here.
+#
+# New workflows (dependency-review.yml, secret-scan.yml,
+# workflow-security.yml) are SHA-pinned from the start and are deliberately
+# left out of this list -- zizmor still fails on those if they regress.
+rules:
+  unpinned-uses:
+    ignore:
+      - codeql-analysis.yml
+      - lint.yml
+      - php-security-update.yml
+      - publish-containers.yml
+      - release-readiness.yml
+      - security-scan.yml
+      - tests.yml
+  artipacked:
+    ignore:
+      - codeql-analysis.yml
+      - lint.yml
+      - php-security-update.yml
+      - publish-containers.yml
+      - release-readiness.yml
+      - security-scan.yml
+      - tests.yml
