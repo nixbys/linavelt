@@ -4,6 +4,10 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 # Dependabot configuration for managing dependencies in the project
+#
+# Updates within each ecosystem are grouped so a week's bumps arrive as one
+# PR per ecosystem/directory rather than a flood of separate ones — matches
+# php-security-update.yml's own weekly cadence and keeps review load down.
 version: 2
 updates:
   # Update PHP dependencies — flux-pro is a private Satis package requiring
@@ -14,21 +18,33 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "livewire/flux-pro"
+    groups:
+      composer:
+        patterns: ["*"]
 
   # Update Node.js dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      npm:
+        patterns: ["*"]
 
   # Update Node.js dependencies in mcp-server
   - package-ecosystem: "npm"
     directory: "/mcp-server"
     schedule:
       interval: "weekly"
+    groups:
+      npm-mcp-server:
+        patterns: ["*"]
 
   # Update GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/.github/workflows"
     schedule:
       interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]
