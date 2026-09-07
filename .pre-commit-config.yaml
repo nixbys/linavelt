@@ -1,0 +1,45 @@
+# Optional pre-commit hooks for contributors who prefer the pre-commit
+# framework over running `npm run check:preflight` / `vendor/bin/pint`
+# manually. This repo's primary local linter aggregator is Trunk
+# (.trunk/trunk.yaml, which already runs actionlint, trufflehog, checkov,
+# osv-scanner, etc.) — Trunk's own pre-commit/pre-push git hook actions are
+# currently disabled there, so this file does not conflict with anything
+# auto-installed. Install with `pip install pre-commit && pre-commit install`
+# if you'd rather use this instead.
+#
+# gitleaks here is the same version .github/workflows/secret-scan.yml pins
+# for CI (keep the two in sync) -- catches a secret before it's ever
+# committed, not just before it's merged. CI's own full-history scan stays
+# the backstop for anything that slips past a contributor who skipped this.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  # Laravel Pint (PSR-12), the same formatter CI runs in lint.yml. Uses the
+  # local repo checkout (`language: system`) rather than a separate Pint
+  # pre-commit mirror, so it always matches the pinned vendor/bin/pint this
+  # project's composer.json resolves — requires `composer install` to have
+  # been run at least once locally.
+  - repo: local
+    hooks:
+      - id: pint
+        name: Laravel Pint
+        entry: vendor/bin/pint
+        language: system
+        types: [php]
+        pass_filenames: true
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+        exclude: ^(vendor/|node_modules/|public/build/|storage/)
+      - id: trailing-whitespace
+        exclude: ^(vendor/|node_modules/|public/build/|storage/)
